@@ -1,0 +1,25 @@
+script: ""
+fonts {
+  name: "vero"
+  font: "/assets/fonts/vero.font"
+}
+nodes {
+  position {
+    x: 129.0
+    y: 553.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "ABCDEFGH\n"
+  "abcdefgh\n"
+  "The quick small Lua\n"
+  "jumped over the zero indices "
+  font: "vero"
+  id: "text"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

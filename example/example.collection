@@ -1,0 +1,55 @@
+name: "main"
+scale_along_z: 0
+embedded_instances {
+  id: "go"
+  data: "components {\n"
+  "  id: \"example\"\n"
+  "  component: \"/example/example.script\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "go1"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "line_break: true\\n"
+  "text: \\\"AaBbCcD\\\\n"
+  "\\\"\\n"
+  "  \\\"ABCDEFGH\\\\n"
+  "\\\"\\n"
+  "  \\\"abcdefgh\\\\n"
+  "\\\"\\n"
+  "  \\\"The quick small Lua\\\\n"
+  "\\\"\\n"
+  "  \\\"jumped over the zero indices \\\"\\n"
+  "font: \\\"/assets/fonts/vero.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 197.0\n"
+  "    y: 137.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 85.0
+    y: 68.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "go2"
+  data: "components {\n"
+  "  id: \"example\"\n"
+  "  component: \"/example/example.gui\"\n"
+  "}\n"
+  ""
+}

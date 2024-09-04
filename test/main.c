@@ -1,6 +1,6 @@
 #include <stdio.h>
 #define STB_TRUETYPE_IMPLEMENTATION  // force following include to generate implementation
-#include "stb_truetype.h"
+#include <stb_truetype.h>
 
 unsigned char ttf_buffer[1<<25];
 
