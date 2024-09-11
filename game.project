@@ -15,3 +15,6 @@ custom_resources = /assets/fonts/vera_mo_bd.ttf
 [library]
 include_dirs = myextension
 
+[native_extension]
+app_manifest = /game.appmanifest
+

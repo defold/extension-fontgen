@@ -1,4 +1,12 @@
 name: "main"
+instances {
+  id: "testgo"
+  prototype: "/example/testgo.go"
+}
+collection_instances {
+  id: "testc"
+  collection: "/example/testc.collection"
+}
 scale_along_z: 0
 embedded_instances {
   id: "go"
