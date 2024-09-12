@@ -159,6 +159,16 @@ float GetDescent(TTFResource* resource, float scale)
     return resource->m_Descent * scale;
 }
 
+void GetCellSize(TTFResource* resource, uint32_t* width, uint32_t* height, uint32_t* max_ascent)
+{
+    int x0, y0, x1, y1;
+    stbtt_GetFontBoundingBox(&resource->m_Font, &x0, &y0, &x1, &y1);
+
+    *width = x1 - x0;
+    *height = y1 - y0;
+    *max_ascent = resource->m_Ascent;
+}
+
 uint8_t* GenerateGlyphSdf(TTFResource* ttfresource, uint32_t glyph_index,
                             float scale, int padding, int edge,
                             dmGameSystem::FontGlyph* out)
@@ -203,10 +213,10 @@ uint8_t* GenerateGlyphSdf(TTFResource* ttfresource, uint32_t glyph_index,
     out->m_Ascent = ascent;
     out->m_Descent = descent;
 
-    printf("glyph: %d  w/h: %d, %d adv: %.2f  lsb: %.2f  asc/dsc: %.2f, %.2f\n", glyph_index,
-            out->m_Width, out->m_Height,
-            out->m_Advance, out->m_LeftBearing,
-            out->m_Ascent, out->m_Descent);
+    // printf("glyph: %d  w/h: %d, %d adv: %.2f  lsb: %.2f  asc/dsc: %.2f, %.2f\n", glyph_index,
+    //         out->m_Width, out->m_Height,
+    //         out->m_Advance, out->m_LeftBearing,
+    //         out->m_Ascent, out->m_Descent);
 
 
     // printf("  box: p0: %d, %d p1: %d, %d\n", x0, y0, x1, y1);

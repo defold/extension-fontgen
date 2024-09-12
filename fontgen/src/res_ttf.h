@@ -30,6 +30,11 @@ namespace dmFontGen
     float GetDescent(TTFResource* resource, float scale);
 
     /*
+     * Gets the max bounds of a glyph
+     */
+    void GetCellSize(TTFResource* resource, uint32_t* width, uint32_t* height, uint32_t* max_ascent);
+
+    /*
      *
      */
     uint8_t* GenerateGlyphSdf(TTFResource* font, uint32_t glyph_index,

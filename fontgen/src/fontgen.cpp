@@ -141,17 +141,12 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     info->m_EdgeValue    = ctx->m_DefaultSdfEdge;
     info->m_Scale        = dmFontGen::SizeToScale(info->m_TTFResource, font_desc.m_Size);
 
-// TODO: Get max dims of a cell
-    r = ResFontSetCacheCellSize(info->m_FontResource, 30, 40, 30);
+    uint32_t cell_width = 0;
+    uint32_t cell_height = 0;
+    uint32_t max_ascent = 0;
+    dmFontGen::GetCellSize(info->m_TTFResource, &cell_width, &cell_height, &max_ascent);
 
-    // printf("FONT: %s\n", path);
-    // printf("  ttf:     %s\n", font_data_path);
-    // printf("  size:    %u\n", font_desc.m_Size);
-    // printf("  padding: %d\n", info->m_Padding);
-    // printf("  edge:    %d\n", info->m_EdgeValue );
-    // printf("  scale:   %.3f\n", info->m_Scale);
-    // printf("  ascent:  %.3f\n", dmFontGen::GetAscent(data->m_Font, info->m_Scale));
-    // printf("  descent: %.3f\n", dmFontGen::GetDescent(data->m_Font, info->m_Scale));
+    r = ResFontSetCacheCellSize(info->m_FontResource, cell_width*info->m_Scale, cell_height*info->m_Scale, max_ascent*info->m_Scale);
 
     if (ctx->m_FontInfos.Full())
     {
@@ -163,19 +158,6 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     dmLogInfo("Loaded font '%s", fontc_path);
     return info;
 }
-
-// static void DeleteFontDataIter(Context* ctx, const dmhash_t* hash, FontData** datap)
-// {
-//     (void)ctx;
-//     (void)hash;
-//     FontData* data = *datap;
-
-//     dmLogWarning("Font data wasn't unloaded: %s", dmFontGen::GetFontPath(data->m_Font));
-
-//     dmFontGen::DestroyFont(data->m_Font);
-//     free(data->m_Resource);
-//     delete data;
-// }
 
 static void DeleteFontInfoIter(Context* ctx, const dmhash_t* hash, FontInfo** infop)
 {
