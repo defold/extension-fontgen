@@ -5,29 +5,16 @@
 
 #include <dmsdk/gamesys/resources/res_font.h>
 
-#include "font.h"
-#include "font_render.h"
+#include "res_ttf.h"
 #include "fontgen.h"
 
 namespace dmFontGen
 {
 
-const char* path = "/assets/fonts/vero.fontc";
-const char* data_path = "/assets/fonts/vera_mo_bd.ttf";
-//const char* path = "/assets/fonts/vera_mo_bd.ttf";
-
-
-struct FontData // the ttf data
-{
-    dmFontGen::Font* m_Font;
-    int              m_RefCount;
-    void*            m_Resource; // Needs to be alive for the stb font
-};
-
 struct FontInfo
 {
     dmGameSystem::FontResource* m_FontResource;
-    FontData*                   m_FontData;
+    dmFontGen::TTFResource*     m_TTFResource;
     int                         m_Padding;
     int                         m_EdgeValue;
     float                       m_Scale;
@@ -36,7 +23,6 @@ struct FontInfo
 struct Context
 {
     HResourceFactory            m_ResourceFactory;
-    dmHashTable64<FontData*>    m_FontDatas; // Loaded .ttf files
     dmHashTable64<FontInfo*>    m_FontInfos; // Loaded .fontc files
 
     uint8_t                     m_DefaultSdfPadding;
@@ -45,104 +31,112 @@ struct Context
 
 Context* g_FontExtContext = 0;
 
-static void UnloadFontData(Context* ctx, dmhash_t hash, FontData* data)
+static bool CheckType(HResourceFactory factory, const char* path, const char** types, uint32_t num_types)
 {
-    if ((--data->m_RefCount) == 0)
-    {
-        dmFontGen::DestroyFont(data->m_Font);
-        data->m_Font = 0;
-        delete data;
-        ctx->m_FontDatas.Erase(hash);
-    }
-}
-
-static FontData* LoadFontData(Context* ctx, const char* path)
-{
-    dmhash_t path_hash = dmHashString64(path);
-
-    FontData** datap = ctx->m_FontDatas.Get(path_hash);
-    if (datap)
-    {
-        (*datap)->m_RefCount++;
-        return *datap;
-    }
-
-    // Get the meta data from the engine resource
-    uint32_t    resource_size = 0;
-    void*       resource = 0;
-    dmResource::Result r = dmResource::GetRaw(ctx->m_ResourceFactory, path, &resource, &resource_size);
+    HResourceDescriptor rd;
+    dmResource::Result r = dmResource::GetDescriptor(factory, path, &rd);
     if (dmResource::RESULT_OK != r)
     {
-        dmLogError("Failed to get font data from '%s'", path);
+        dmLogError("Failed to get descriptor for resource %s", path);
         return 0;
     }
 
+    HResourceType type = ResourceDescriptorGetType(rd);
+    const char* type_name = ResourceTypeGetName(type);
 
-    dmFontGen::Font* font = dmFontGen::LoadFontFromMem(path, resource, resource_size);
-
-    if (font == 0)
+    for (uint32_t i = 0; i < num_types; ++i)
     {
-        free(resource);
-        dmLogError("Failed to parse font '%s'", path);
-        return 0;
+dmLogWarning("COMPARING %s == %s", type_name, types[i]);
+        if (strcmp(type_name, types[i]) == 0)
+            return true;
     }
-
-    FontData* data = new FontData;
-    data->m_RefCount = 0;
-    data->m_Font = font;
-    data->m_Resource = resource;
-
-    if (ctx->m_FontDatas.Full())
-    {
-        uint32_t cap = ctx->m_FontDatas.Capacity() + 8;
-        ctx->m_FontDatas.SetCapacity((cap*2)/3, cap);
-    }
-    ctx->m_FontDatas.Put(path_hash, data);
-
-    dmLogInfo("Loaded font data'%s", path);
-    return data;
+    return false;
 }
 
-
-static FontInfo* LoadFont(Context* ctx, const char* path)
+static TTFResource* LoadFontData(Context* ctx, const char* path)
 {
-    // Get the meta data from the engine resource
-    dmhash_t path_hash = dmHashString64(path);
-
-    dmGameSystem::FontResource* resource;
+    TTFResource* resource = 0;
     dmResource::Result r = dmResource::Get(ctx->m_ResourceFactory, path, (void**)&resource);
     if (dmResource::RESULT_OK != r)
     {
         dmLogError("Failed to get resource '%s'", path);
+        //DeleteFontData(ctx, data);
+        return 0;
+    }
+
+    const char* types[] = { "ttf" };
+    if (!CheckType(ctx->m_ResourceFactory, path, types, 1))
+    {
+        dmLogError("Wrong type of resource %s (expected %s)", path, types[0]);
+        dmResource::Release(ctx->m_ResourceFactory, resource);
+        //DeleteFontData(ctx, data);
+        return 0;
+    }
+
+    dmLogInfo("Loaded font data'%s", path);
+    return resource;
+}
+
+static void DeleteFont(Context* ctx, FontInfo* info)
+{
+    if (info->m_FontResource)
+        dmResource::Release(ctx->m_ResourceFactory, info->m_FontResource);
+    if (info->m_TTFResource)
+        dmResource::Release(ctx->m_ResourceFactory, info->m_TTFResource);
+    delete info;
+}
+
+static bool UnloadFont(Context* ctx, dmhash_t fontc_path_hash)
+{
+    FontInfo** ppinfo = ctx->m_FontInfos.Get(fontc_path_hash);
+    if (!ppinfo)
+        return false;
+
+    DeleteFont(ctx, *ppinfo);
+    ctx->m_FontInfos.Erase(fontc_path_hash);
+    return true;
+}
+
+static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_path)
+{
+    dmhash_t path_hash = dmHashString64(fontc_path);
+
+    FontInfo* info = new FontInfo;
+    memset(info, 0, sizeof(*info));
+
+    dmResource::Result r = dmResource::Get(ctx->m_ResourceFactory, fontc_path, (void**)&info->m_FontResource);
+    if (dmResource::RESULT_OK != r)
+    {
+        dmLogError("Failed to get .fontc resource '%s'", fontc_path);
+        DeleteFont(ctx, info);
+        return 0;
+    }
+
+    const char* types[] = { "fontc" };
+    if (!CheckType(ctx->m_ResourceFactory, fontc_path, types, 1))
+    {
+        DeleteFont(ctx, info);
+        return 0;
+    }
+
+    info->m_TTFResource = LoadFontData(ctx, ttf_path);
+    if (!info->m_TTFResource)
+    {
+        DeleteFont(ctx, info);
         return 0;
     }
 
     dmGameSystem::FontMapDesc font_desc;
-    r = dmGameSystem::ResFontGetInfo(resource, &font_desc);
+    r = dmGameSystem::ResFontGetInfo(info->m_FontResource, &font_desc);
     if (dmResource::RESULT_OK != r)
     {
-        dmLogError("Failed to get font info from '%s'", path);
+        dmLogError("Failed to get font info from '%s'", fontc_path);
         return 0;
     }
 
-    //const char* font_data_path = font_desc.m_Font;
-    const char* font_data_path = data_path;
-
-    FontData* data = LoadFontData(ctx, font_data_path);
-    if (!data)
-    {
-        dmResource::Release(ctx->m_ResourceFactory, resource);
-        return 0;
-    }
-
-
-    FontInfo* info = new FontInfo;
-
-    info->m_FontResource = resource;
-    info->m_FontData     = data;
     info->m_Padding      = ctx->m_DefaultSdfPadding + font_desc.m_ShadowBlur + font_desc.m_OutlineWidth; // 3 is arbitrary but resembles the output from out generator
     info->m_EdgeValue    = ctx->m_DefaultSdfEdge;
-    info->m_Scale        = dmFontGen::SizeToScale(data->m_Font, font_desc.m_Size);
+    info->m_Scale        = dmFontGen::SizeToScale(info->m_TTFResource, font_desc.m_Size);
 
     // printf("FONT: %s\n", path);
     // printf("  ttf:     %s\n", font_data_path);
@@ -160,22 +154,22 @@ static FontInfo* LoadFont(Context* ctx, const char* path)
     }
     ctx->m_FontInfos.Put(path_hash, info);
 
-    dmLogInfo("Loaded font '%s", path);
+    dmLogInfo("Loaded font '%s", fontc_path);
     return info;
 }
 
-static void DeleteFontDataIter(Context* ctx, const dmhash_t* hash, FontData** datap)
-{
-    (void)ctx;
-    (void)hash;
-    FontData* data = *datap;
+// static void DeleteFontDataIter(Context* ctx, const dmhash_t* hash, FontData** datap)
+// {
+//     (void)ctx;
+//     (void)hash;
+//     FontData* data = *datap;
 
-    dmLogWarning("Font data wasn't unloaded: %s", dmFontGen::GetFontPath(data->m_Font));
+//     dmLogWarning("Font data wasn't unloaded: %s", dmFontGen::GetFontPath(data->m_Font));
 
-    dmFontGen::DestroyFont(data->m_Font);
-    free(data->m_Resource);
-    delete data;
-}
+//     dmFontGen::DestroyFont(data->m_Font);
+//     free(data->m_Resource);
+//     delete data;
+// }
 
 static void DeleteFontInfoIter(Context* ctx, const dmhash_t* hash, FontInfo** infop)
 {
@@ -187,6 +181,7 @@ static void DeleteFontInfoIter(Context* ctx, const dmhash_t* hash, FontInfo** in
     dmLogWarning("Font resource wasn't released: %s", dmHashReverseSafe64(path_hash));
 
     dmResource::Release(ctx->m_ResourceFactory, info->m_FontResource);
+    dmResource::Release(ctx->m_ResourceFactory, info->m_TTFResource);
     delete info;
 }
 
@@ -203,11 +198,11 @@ static void AddGlyphs(FontInfo* info, const char* text)
     uint32_t cache_cell_max_ascent;
     dmResource::Result r = dmGameSystem::ResFontGetCacheCellInfo(info->m_FontResource, &cache_cell_width, &cache_cell_height, &cache_cell_max_ascent);
 
-    dmFontGen::Font* font = info->m_FontData->m_Font;
+    TTFResource* ttfresource = info->m_TTFResource;
 
     float scale = info->m_Scale;
-    float ascent = dmFontGen::GetAscent(font, scale);
-    float descent = dmFontGen::GetDescent(font, scale);
+    float ascent = dmFontGen::GetAscent(ttfresource, scale);
+    float descent = dmFontGen::GetDescent(ttfresource, scale);
     bool is_sdf = true;
 
     const char* cursor = text;
@@ -225,7 +220,7 @@ static void AddGlyphs(FontInfo* info, const char* text)
             continue;
         }
 
-        uint32_t glyph_index = dmFontGen::CodePointToGlyphIndex(font, c);
+        uint32_t glyph_index = dmFontGen::CodePointToGlyphIndex(ttfresource, c);
         if (!glyph_index)
             continue; // No such glyph!
 
@@ -236,7 +231,7 @@ static void AddGlyphs(FontInfo* info, const char* text)
 
         // Blit the font glyph image into a cache cell image
         if (is_sdf)
-            celldata = dmFontGen::GenerateGlyphSdf(font, glyph_index, scale, info->m_Padding, info->m_EdgeValue,
+            celldata = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, scale, info->m_Padding, info->m_EdgeValue,
                                                     cache_cell_width, cache_cell_height, cache_cell_max_ascent,
                                                     &fg);
 
@@ -246,25 +241,6 @@ static void AddGlyphs(FontInfo* info, const char* text)
         // The font system takes ownership of the image data
         dmResource::Result r = dmGameSystem::ResFontAddGlyph(info->m_FontResource, c, &fg, celldata, celldatasize);
     }
-}
-
-static dmExtension::Result OnUpdateFontGen(dmExtension::Params* params)
-{
-    static int count = 0;
-    if (count++ == 20)
-    {
-        FontInfo* info = LoadFont(g_FontExtContext, path);
-
-        if (!info)
-            return dmExtension::RESULT_OK;
-
-        const char* text = "DEFdef";
-        AddGlyphs(info, text);
-
-        ResFontDebugPrint(info->m_FontResource);
-    }
-
-    return dmExtension::RESULT_OK;
 }
 
 bool Initialize(dmExtension::Params* params)
@@ -281,8 +257,6 @@ void Finalize(dmExtension::Params* params)
 {
     g_FontExtContext->m_FontInfos.Iterate(DeleteFontInfoIter, g_FontExtContext);
     g_FontExtContext->m_FontInfos.Clear();
-    g_FontExtContext->m_FontDatas.Iterate(DeleteFontDataIter, g_FontExtContext);
-    g_FontExtContext->m_FontDatas.Clear();
 
     delete g_FontExtContext;
     g_FontExtContext = 0;
@@ -294,19 +268,53 @@ void Update(dmExtension::Params* params)
     // TODO: Add worker thread!
     // TODO: Loop over any finished items
 
-    static int count = 0;
-    if (count++ == 20)
-    {
-        FontInfo* info = LoadFont(g_FontExtContext, path);
+    // static int count = 0;
+    // if (count++ == 20)
+    // {
+    //     FontInfo* info = LoadFont(g_FontExtContext, path, data_path);
 
-        if (!info)
-            return;
+    //     if (!info)
+    //         return;
 
-        const char* text = "DEFdef";
-        AddGlyphs(info, text);
+    //     const char* text = "DEFdef";
+    //     AddGlyphs(info, text);
 
-        ResFontDebugPrint(info->m_FontResource);
-    }
+    //     ResFontDebugPrint(info->m_FontResource);
+    // }
 }
+
+// Scripting
+
+bool LoadFont(const char* fontc_path, const char* ttf_path)
+{
+    Context* ctx = g_FontExtContext;
+    FontInfo** pinfo = ctx->m_FontInfos.Get(dmHashString64(fontc_path));
+    if (pinfo)
+        return false; // Already loaded
+
+    FontInfo* info = LoadFont(ctx, fontc_path, ttf_path);
+    return info != 0;
+}
+
+bool UnloadFont(dmhash_t fontc_path_hash)
+{
+    Context* ctx = g_FontExtContext;
+    return UnloadFont(ctx, fontc_path_hash);
+}
+
+
+bool AddGlyphs(dmhash_t fontc_path_hash, const char* text)
+{
+    Context* ctx = g_FontExtContext;
+    FontInfo** pinfo = ctx->m_FontInfos.Get(fontc_path_hash);
+    if (!pinfo)
+        return false;
+
+    AddGlyphs(*pinfo, text);
+
+    dmGameSystem::ResFontDebugPrint((*pinfo)->m_FontResource);
+    return true;
+}
+
 
 } // namespace

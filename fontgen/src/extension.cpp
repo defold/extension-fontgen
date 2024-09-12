@@ -1,87 +1,69 @@
 #include <dmsdk/sdk.h>
 #include <dmsdk/dlib/hash.h>
-#include <dmsdk/dlib/hashtable.h>
-#include <dmsdk/dlib/utf8.h>
 
-#include <dmsdk/gamesys/resources/res_font.h>
-
-//#include "stb_truetype.h"
-
-#include "font.h"
-#include "font_render.h"
 #include "fontgen.h"
 
 #define MODULE_NAME "fontgen"
 
-const char* path = "/assets/fonts/vero.fontc";
-const char* data_path = "/assets/fonts/vera_mo_bd.ttf";
-//const char* path = "/assets/fonts/vera_mo_bd.ttf";
 
-
-struct FontData // the ttf data
+static int LoadFont(lua_State* L)
 {
-    dmFontGen::Font* m_Font;
-    int              m_RefCount;
-    void*            m_Resource; // Needs to be alive for the stb font
-};
+    DM_LUA_STACK_CHECK(L, 2);
 
-struct FontInfo
+    const char* fontc_path = luaL_checkstring(L, 1); // dmScript::CheckHash(L, 1);
+    const char* ttf_path = luaL_checkstring(L, 2); //dmScript::CheckHash(L, 2);
+
+    if (!dmFontGen::LoadFont(fontc_path, ttf_path))
+    {
+        lua_pushnil(L); // No font
+        lua_pushfstring(L, "Failed to load one of fonts: %s / %s", fontc_path, ttf_path);
+    }
+    else
+    {
+        dmScript::PushHash(L, dmHashString64(fontc_path));
+        lua_pushnil(L); // no error
+    }
+    return 2;
+}
+
+static int UnloadFont(lua_State* L)
 {
-    dmGameSystem::FontResource* m_FontResource;
-    FontData*                   m_FontData;
-    int                         m_Padding;
-    int                         m_EdgeValue;
-    float                       m_Scale;
-};
+    DM_LUA_STACK_CHECK(L, 0);
 
-struct Context
+    dmhash_t fontc_path_hash = dmScript::CheckHashOrString(L, 1);
+    if (!dmFontGen::UnloadFont(fontc_path_hash))
+        return luaL_error(L, "Failed to unload font %s", dmHashReverseSafe64(fontc_path_hash));
+
+    return 0;
+}
+
+static int AddGlyphs(lua_State* L)
 {
-    HResourceFactory            m_ResourceFactory;
-    dmHashTable64<FontData*>    m_FontDatas; // Loaded .ttf files
-    dmHashTable64<FontInfo*>    m_FontInfos; // Loaded .fontc files
+    DM_LUA_STACK_CHECK(L, 0);
 
-    uint8_t                     m_DefaultSdfPadding;
-    uint8_t                     m_DefaultSdfEdge;
-};
+    dmhash_t fontc_path_hash = dmScript::CheckHashOrString(L, 1);
+    const char* text = luaL_checkstring(L, 2);
 
-Context* g_FontExtContext = 0;
+    if (!dmFontGen::AddGlyphs(fontc_path_hash, text))
+        return luaL_error(L, "Failed to add glyphs to font %s", dmHashReverseSafe64(fontc_path_hash));
 
-// static int Reverse(lua_State* L)
-// {
-//     // The number of expected items to be on the Lua stack
-//     // once this struct goes out of scope
-//     DM_LUA_STACK_CHECK(L, 1);
-
-//     // Check and get parameter string from stack
-//     char* str = (char*)luaL_checkstring(L, 1);
-
-//     // Reverse the string
-//     int len = strlen(str);
-//     for(int i = 0; i < len / 2; i++) {
-//         const char a = str[i];
-//         const char b = str[len - i - 1];
-//         str[i] = b;
-//         str[len - i - 1] = a;
-//     }
-
-//     // Put the reverse string on the stack
-//     lua_pushstring(L, str);
-
-//     // Return 1 item
-//     return 1;
-// }
+    return 0;
+}
 
 // Functions exposed to Lua
 static const luaL_reg Module_methods[] =
 {
-    //{"reverse", Reverse},
+    {"load_font", LoadFont},
+    {"unload_font", UnloadFont},
+    {"add_glyphs", AddGlyphs},
+    // {"remove_glyphs", RemoveGlyphs},
     {0, 0}
 };
 
 static void LuaInit(lua_State* L)
 {
     int top = lua_gettop(L);
-    luaL_register(L, "fontext", Module_methods);
+    luaL_register(L, MODULE_NAME, Module_methods);
     lua_pop(L, 1);
     assert(top == lua_gettop(L));
 }
@@ -95,7 +77,7 @@ static dmExtension::Result InitializeFontGen(dmExtension::Params* params)
 {
     // Init Lua
     LuaInit(params->m_L);
-    dmLogInfo("Registered %s Extension", MODULE_NAME);
+    dmLogInfo("Registered %s extension", MODULE_NAME);
 
     dmFontGen::Initialize(params);
     return dmExtension::RESULT_OK;

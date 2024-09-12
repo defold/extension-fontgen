@@ -1,12 +1,20 @@
 function init(self)
-	local s = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	--local reverse_s = myextension.reverse(s)
-	--print(reverse_s) --> ZYXWVUTSRQPONMLKJIHGFEDCBAzyxwvutsrqponmlkjihgfedcba
+
+	local fontc = "/assets/fonts/vero.fontc"
+	local ttf = "/assets/fonts/vera_mo_bd.ttf"
+	local fontc_hash, err = fontgen.load_font(fontc, ttf)
+	print("Result:", fontc_hash, err)
+
+	self.font = fontc_hash
+
+	local chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+
+	--fontgen.add_glyphs(self.font, "DEFdef")
+	fontgen.add_glyphs(self.font, chars)
 end
 
 function final(self)
-	-- Add finalization code here
-	-- Remove this function if not needed
+	fontgen.unload_font(self.font)
 end
 
 function update(self, dt)

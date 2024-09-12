@@ -1,2 +1,8 @@
 # C++ symbol in your extension
 name: "FontGen"
+
+platforms:
+    common:
+        context:
+            defines:    []
+            symbols:    ["ResourceTypeTTFFont"]
