@@ -166,32 +166,35 @@ uint8_t* GenerateGlyphSdf(TTFResource* ttfresource, uint32_t glyph_index,
 
     float pixel_dist_scale = (float)edge/(float)padding;
 
-    int srcw, srch, offsetx, offsety;
-    uint8_t* src = stbtt_GetGlyphSDF(&ttfresource->m_Font, scale, glyph_index, padding, edge, pixel_dist_scale,
-                                        &srcw, &srch, &offsetx, &offsety);
-    if (!src)
-    {
-        //dmLogError("Glyph index %d does not exist in font: %s", glyph_index, ttfresource->m_Path);
-        return 0;
-    }
-
     int advx, lsb;
     stbtt_GetGlyphHMetrics(&ttfresource->m_Font, glyph_index, &advx, &lsb);
 
     int x0, y0, x1, y1;
     stbtt_GetGlyphBitmapBox(&ttfresource->m_Font, glyph_index, scale, scale, &x0, &y0, &x1, &y1);
 
-    int ascent = -offsety;
-    int descent = srch - ascent;
+    int ascent = 0;
+    int descent = 0;
+    int srcw = 0;
+    int srch = 0;
+    int offsetx, offsety;
+    uint8_t* src = stbtt_GetGlyphSDF(&ttfresource->m_Font, scale, glyph_index, padding, edge, pixel_dist_scale,
+                                        &srcw, &srch, &offsetx, &offsety);
 
-    uint32_t memsize = srcw*srch + 1;
-    uint8_t* mem = (uint8_t*)malloc(memsize);
-    memset(mem, 0, memsize);
-    uint8_t* bm = mem + 1;
+    uint8_t* mem = 0;
+    if (src)
+    {
+        uint32_t memsize = srcw*srch + 1;
+        mem = (uint8_t*)malloc(memsize);
+        memset(mem, 0, memsize);
+        uint8_t* bm = mem + 1;
 
-    memcpy(bm, src, srcw*srch);
+        memcpy(bm, src, srcw*srch);
 
-    stbtt_FreeSDF(src, 0);
+        stbtt_FreeSDF(src, 0);
+
+        ascent = -offsety;
+        descent = srch - ascent;
+    }
 
     out->m_Width = srcw;
     out->m_Height = srch;
@@ -200,10 +203,10 @@ uint8_t* GenerateGlyphSdf(TTFResource* ttfresource, uint32_t glyph_index,
     out->m_Ascent = ascent;
     out->m_Descent = descent;
 
-    // printf("glyph: %d  w/h: %d, %d adv: %.2f  lsb: %.2f  asc/dsc: %.2f, %.2f\n", glyph_index,
-    //         out->m_Width, out->m_Height,
-    //         out->m_Advance, out->m_LeftBearing,
-    //         out->m_Ascent, out->m_Descent);
+    printf("glyph: %d  w/h: %d, %d adv: %.2f  lsb: %.2f  asc/dsc: %.2f, %.2f\n", glyph_index,
+            out->m_Width, out->m_Height,
+            out->m_Advance, out->m_LeftBearing,
+            out->m_Ascent, out->m_Descent);
 
 
     // printf("  box: p0: %d, %d p1: %d, %d\n", x0, y0, x1, y1);
