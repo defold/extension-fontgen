@@ -1,7 +1,8 @@
 #include "util.h"
 #include <stdio.h>
 
-namespace dmFont {
+namespace dmFontGen
+{
 
 void DebugPrintBitmap(uint8_t* bitmap, int w, int h)
 {

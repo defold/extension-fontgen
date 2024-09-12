@@ -13,6 +13,6 @@ namespace dmFontGen
 
     bool LoadFont(const char* fontc_path, const char* ttf_path);
     bool UnloadFont(dmhash_t fontc_path_hash);
-    bool AddGlyphs(dmhash_t fontc_path_hash, const char* utf8_text);
-
+    bool AddGlyphs(dmhash_t fontc_path_hash, const char* text);
+    bool RemoveGlyphs(dmhash_t fontc_path_hash, const char* text);
 }

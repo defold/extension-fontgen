@@ -10,7 +10,7 @@ height = 640
 
 [project]
 title = extension-font
-custom_resources = /assets/fonts/vera_mo_bd.ttf
+custom_resources = /assets/fonts/Roboto/Roboto-Bold.ttf
 
 [library]
 include_dirs = myextension

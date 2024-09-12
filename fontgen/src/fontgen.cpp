@@ -90,7 +90,10 @@ static bool UnloadFont(Context* ctx, dmhash_t fontc_path_hash)
 {
     FontInfo** ppinfo = ctx->m_FontInfos.Get(fontc_path_hash);
     if (!ppinfo)
+    {
+        dmLogError("Font not loaded: %s", dmHashReverseSafe64(fontc_path_hash));
         return false;
+    }
 
     DeleteFont(ctx, *ppinfo);
     ctx->m_FontInfos.Erase(fontc_path_hash);
@@ -137,6 +140,9 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     info->m_Padding      = ctx->m_DefaultSdfPadding + font_desc.m_ShadowBlur + font_desc.m_OutlineWidth; // 3 is arbitrary but resembles the output from out generator
     info->m_EdgeValue    = ctx->m_DefaultSdfEdge;
     info->m_Scale        = dmFontGen::SizeToScale(info->m_TTFResource, font_desc.m_Size);
+
+// TODO: Get max dims of a cell
+    r = ResFontSetCacheCellSize(info->m_FontResource, 30, 40, 30);
 
     // printf("FONT: %s\n", path);
     // printf("  ttf:     %s\n", font_data_path);
@@ -185,18 +191,14 @@ static void DeleteFontInfoIter(Context* ctx, const dmhash_t* hash, FontInfo** in
     delete info;
 }
 
-
-// NOTE:
-//   Currently unsupported features:
-//      * Bitmap fonts
-//      * Caching the generated data to disc
-
 static void AddGlyphs(FontInfo* info, const char* text)
 {
+    uint64_t tstart = dmTime::GetTime();
+
     uint32_t cache_cell_width;
     uint32_t cache_cell_height;
     uint32_t cache_cell_max_ascent;
-    dmResource::Result r = dmGameSystem::ResFontGetCacheCellInfo(info->m_FontResource, &cache_cell_width, &cache_cell_height, &cache_cell_max_ascent);
+    dmResource::Result r = dmGameSystem::ResFontGetCacheCellSize(info->m_FontResource, &cache_cell_width, &cache_cell_height, &cache_cell_max_ascent);
 
     TTFResource* ttfresource = info->m_TTFResource;
 
@@ -208,21 +210,23 @@ static void AddGlyphs(FontInfo* info, const char* text)
     const char* cursor = text;
     uint32_t c = 0;
 
+    uint32_t num_added = 0;
     while ((c = dmUtf8::NextChar(&cursor)))
     {
         //uint32_t c = chars[i];
         printf("---------------------------------------------\n");
         printf("CHAR: '%c'\n", c);
 
-        if (dmGameSystem::ResFontHasGlyph(info->m_FontResource, c))
-        {
-            printf("  already existed: '%c'\n", c);
-            continue;
-        }
+        // if (dmGameSystem::ResFontHasGlyph(info->m_FontResource, c))
+        // {
+        //     printf("  already existed: '%c'\n", c);
+        //     continue;
+        // }
 
         uint32_t glyph_index = dmFontGen::CodePointToGlyphIndex(ttfresource, c);
         if (!glyph_index)
             continue; // No such glyph!
+        num_added++;
 
         uint32_t celldatasize = cache_cell_width * cache_cell_height + 1;
         uint8_t* celldata = 0;
@@ -231,15 +235,42 @@ static void AddGlyphs(FontInfo* info, const char* text)
 
         // Blit the font glyph image into a cache cell image
         if (is_sdf)
-            celldata = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, scale, info->m_Padding, info->m_EdgeValue,
-                                                    cache_cell_width, cache_cell_height, cache_cell_max_ascent,
-                                                    &fg);
+        {
+            celldata = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, scale, info->m_Padding, info->m_EdgeValue, &fg);
+        }
 
         if (!celldata)
-            continue; // Something went wrong
+        {
+            bool is_space = c == ' ';
+            if (!is_space)
+                continue; // Something went wrong
+
+            celldatasize = 0;
+            fg.m_Width = 0;
+            fg.m_Height = 0;
+            fg.m_Ascent = 0;
+            fg.m_Descent = 0;
+
+            // TODO: Get advance for space!
+        }
 
         // The font system takes ownership of the image data
         dmResource::Result r = dmGameSystem::ResFontAddGlyph(info->m_FontResource, c, &fg, celldata, celldatasize);
+    }
+
+    uint64_t tend = dmTime::GetTime();
+    printf("Added %u glyphs in %.3fs\n", num_added, (tend-tstart)/1000000.0f);
+}
+
+static void RemoveGlyphs(FontInfo* info, const char* text)
+{
+    const char* cursor = text;
+    uint32_t c = 0;
+
+    uint32_t num_added = 0;
+    while ((c = dmUtf8::NextChar(&cursor)))
+    {
+        dmGameSystem::ResFontRemoveGlyph(info->m_FontResource, c);
     }
 }
 
@@ -290,7 +321,10 @@ bool LoadFont(const char* fontc_path, const char* ttf_path)
     Context* ctx = g_FontExtContext;
     FontInfo** pinfo = ctx->m_FontInfos.Get(dmHashString64(fontc_path));
     if (pinfo)
+    {
+        dmLogError("Font already loaded %s / %s", fontc_path, ttf_path);
         return false; // Already loaded
+    }
 
     FontInfo* info = LoadFont(ctx, fontc_path, ttf_path);
     return info != 0;
@@ -308,13 +342,34 @@ bool AddGlyphs(dmhash_t fontc_path_hash, const char* text)
     Context* ctx = g_FontExtContext;
     FontInfo** pinfo = ctx->m_FontInfos.Get(fontc_path_hash);
     if (!pinfo)
+    {
+        dmLogError("Font not loaded %s", dmHashReverseSafe64(fontc_path_hash));
         return false;
+    }
 
     AddGlyphs(*pinfo, text);
 
     dmGameSystem::ResFontDebugPrint((*pinfo)->m_FontResource);
     return true;
 }
+
+
+bool RemoveGlyphs(dmhash_t fontc_path_hash, const char* text)
+{
+    Context* ctx = g_FontExtContext;
+    FontInfo** pinfo = ctx->m_FontInfos.Get(fontc_path_hash);
+    if (!pinfo)
+    {
+        dmLogError("Font not loaded %s", dmHashReverseSafe64(fontc_path_hash));
+        return false;
+    }
+
+    RemoveGlyphs(*pinfo, text);
+
+    dmGameSystem::ResFontDebugPrint((*pinfo)->m_FontResource);
+    return true;
+}
+
 
 
 } // namespace

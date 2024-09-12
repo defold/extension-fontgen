@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace dmFont
+namespace dmFontGen
 {
     /*
      * Outputs a w*h single channel bitmap to stdout

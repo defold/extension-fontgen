@@ -50,13 +50,26 @@ static int AddGlyphs(lua_State* L)
     return 0;
 }
 
+static int RemoveGlyphs(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    dmhash_t fontc_path_hash = dmScript::CheckHashOrString(L, 1);
+    const char* text = luaL_checkstring(L, 2);
+
+    if (!dmFontGen::RemoveGlyphs(fontc_path_hash, text))
+        return luaL_error(L, "Failed to remove glyphs from font %s", dmHashReverseSafe64(fontc_path_hash));
+
+    return 0;
+}
+
 // Functions exposed to Lua
 static const luaL_reg Module_methods[] =
 {
     {"load_font", LoadFont},
     {"unload_font", UnloadFont},
     {"add_glyphs", AddGlyphs},
-    // {"remove_glyphs", RemoveGlyphs},
+    {"remove_glyphs", RemoveGlyphs},
     {0, 0}
 };
 

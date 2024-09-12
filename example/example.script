@@ -1,7 +1,8 @@
 function init(self)
 
 	local fontc = "/assets/fonts/vero.fontc"
-	local ttf = "/assets/fonts/vera_mo_bd.ttf"
+	--local ttf = "/assets/fonts/vera_mo_bd.ttf"
+	local ttf = "/assets/fonts/Roboto/Roboto-Bold.ttf"
 	local fontc_hash, err = fontgen.load_font(fontc, ttf)
 	print("Result:", fontc_hash, err)
 
@@ -14,6 +15,7 @@ function init(self)
 end
 
 function final(self)
+	fontgen.remove_glyphs(self.font, "DEFdef")
 	fontgen.unload_font(self.font)
 end
 
