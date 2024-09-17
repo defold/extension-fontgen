@@ -208,6 +208,7 @@ uint8_t* GenerateGlyphSdf(TTFResource* ttfresource, uint32_t glyph_index,
 
     out->m_Width = srcw;
     out->m_Height = srch;
+    out->m_Channels = 1;
     out->m_Advance = advx*scale;;
     out->m_LeftBearing = lsb*scale;
     out->m_Ascent = ascent;
@@ -222,10 +223,13 @@ uint8_t* GenerateGlyphSdf(TTFResource* ttfresource, uint32_t glyph_index,
     // printf("  box: p0: %d, %d p1: %d, %d\n", x0, y0, x1, y1);
     // printf("  offset: %d, %d \n", offsetx, offsety);
 
-    // int debug = glyph_index == 77 || glyph_index == 75;
+    // int gi_T = dmFontGen::CodePointToGlyphIndex(ttfresource, 'T');
+    // int gi_h = dmFontGen::CodePointToGlyphIndex(ttfresource, 'h');
+    // // int debug = glyph_index == 77 || glyph_index == 75;
+    // int debug = glyph_index == gi_T || glyph_index == gi_h;
 
     // if (debug)
-    //     DebugPrintBitmap(bm, srcw, srch);
+    //     DebugPrintBitmap((mem+1), srcw, srch);
 
     return mem;
 }

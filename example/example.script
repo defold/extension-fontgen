@@ -1,22 +1,31 @@
 function init(self)
 
-	local fontc = "/assets/fonts/vero.fontc"
-	--local ttf = "/assets/fonts/vera_mo_bd.ttf"
+	local fontc = "/assets/fonts/roboto.fontc"
 	local ttf = "/assets/fonts/Roboto/Roboto-Bold.ttf"
 	local fontc_hash, err = fontgen.load_font(fontc, ttf)
-	print("Result:", fontc_hash, err)
+	if err ~= nil then
+		print("Result:", fontc_hash, err)
+	end
+
+	local fontc = "/assets/fonts/roboto_outline.fontc"
+	local fontc_outline_hash, err = fontgen.load_font(fontc, ttf)
+	if err ~= nil then
+		print("Result:", fontc_outline_hash, err)
+	end
 
 	self.font = fontc_hash
+	self.font_outline = fontc_outline_hash
 
 	local chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
-	--fontgen.add_glyphs(self.font, "DEFdef")
 	fontgen.add_glyphs(self.font, chars)
+	fontgen.add_glyphs(self.font_outline, chars)
 end
 
 function final(self)
 	fontgen.remove_glyphs(self.font, "DEFdef")
 	fontgen.unload_font(self.font)
+	fontgen.unload_font(self.font_outline)
 end
 
 function update(self, dt)

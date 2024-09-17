@@ -1,7 +1,10 @@
 font: "/assets/fonts/Roboto/Roboto-Bold.ttf"
 material: "/builtins/fonts/font-df.material"
 size: 28
+outline_alpha: 1.0
+outline_width: 5.0
 output_format: TYPE_DISTANCE_FIELD
 cache_width: 256
 cache_height: 256
-characters: "."
+render_mode: MODE_MULTI_LAYER
+characters: ".D"
