@@ -7,6 +7,7 @@
 
 #include "res_ttf.h"
 #include "fontgen.h"
+#include "job_thread.h"
 
 namespace dmFontGen
 {
@@ -18,13 +19,18 @@ struct FontInfo
     int                         m_Padding;
     int                         m_EdgeValue;
     float                       m_Scale;
+
+    uint32_t                    m_CacheCellWidth;
+    uint32_t                    m_CacheCellHeight;
+    uint32_t                    m_CacheCellMaxAscent;
+    bool                        m_IsSdf;
 };
 
 struct Context
 {
     HResourceFactory            m_ResourceFactory;
     dmHashTable64<FontInfo*>    m_FontInfos; // Loaded .fontc files
-
+    dmJobThread::HContext       m_Jobs;
     uint8_t                     m_DefaultSdfPadding;
     uint8_t                     m_DefaultSdfEdge;
 };
@@ -46,7 +52,6 @@ static bool CheckType(HResourceFactory factory, const char* path, const char** t
 
     for (uint32_t i = 0; i < num_types; ++i)
     {
-dmLogWarning("COMPARING %s == %s", type_name, types[i]);
         if (strcmp(type_name, types[i]) == 0)
             return true;
     }
@@ -141,12 +146,27 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     info->m_EdgeValue    = ctx->m_DefaultSdfEdge;
     info->m_Scale        = dmFontGen::SizeToScale(info->m_TTFResource, font_info.m_Size);
 
+    // TODO: Support bitmap fonts
+    info->m_IsSdf        = true;
+
     uint32_t cell_width = 0;
     uint32_t cell_height = 0;
     uint32_t max_ascent = 0;
     dmFontGen::GetCellSize(info->m_TTFResource, &cell_width, &cell_height, &max_ascent);
 
-    r = ResFontSetCacheCellSize(info->m_FontResource, cell_width*info->m_Scale, cell_height*info->m_Scale, info->m_Padding + max_ascent*info->m_Scale);
+    info->m_CacheCellWidth = cell_width*info->m_Scale;
+    info->m_CacheCellHeight = cell_height*info->m_Scale;
+    info->m_CacheCellMaxAscent = info->m_Padding + max_ascent*info->m_Scale;
+    r = ResFontSetCacheCellSize(info->m_FontResource, info->m_CacheCellWidth, info->m_CacheCellHeight, info->m_CacheCellMaxAscent);
+
+TTFResource* ttfresource = info->m_TTFResource;
+
+float scale = info->m_Scale;
+float ascent = dmFontGen::GetAscent(ttfresource, scale);
+float descent = dmFontGen::GetDescent(ttfresource, scale);
+
+
+
 
     if (ctx->m_FontInfos.Full())
     {
@@ -173,22 +193,86 @@ static void DeleteFontInfoIter(Context* ctx, const dmhash_t* hash, FontInfo** in
     delete info;
 }
 
-static void AddGlyphs(FontInfo* info, const char* text)
+// ****************************************************************************************************
+
+struct JobItem
 {
-    uint64_t tstart = dmTime::GetTime();
+    // input
+    FontInfo* m_FontInfo;
+    uint32_t  m_Codepoint;
+    // output
+    dmGameSystem::FontGlyph m_Glyph;
+    uint8_t*                m_Data;     // May be 0. First byte is the compression (0=no compression, 1=deflate)
+    uint32_t                m_DataSize;
+};
 
-    uint32_t cache_cell_width;
-    uint32_t cache_cell_height;
-    uint32_t cache_cell_max_ascent;
-    dmResource::Result r = dmGameSystem::ResFontGetCacheCellSize(info->m_FontResource, &cache_cell_width, &cache_cell_height, &cache_cell_max_ascent);
+// Called on the worker thread
+static int JobGenerateGlyph(void* context, void* data)
+{
+    Context* ctx = (Context*)context;
+    JobItem* item = (JobItem*)data;
+    FontInfo* info = item->m_FontInfo;
+    uint32_t codepoint = item->m_Codepoint;
 
+    //
     TTFResource* ttfresource = info->m_TTFResource;
+    uint32_t glyph_index = dmFontGen::CodePointToGlyphIndex(ttfresource, codepoint);
+    if (!glyph_index)
+        return 0;
 
-    float scale = info->m_Scale;
-    float ascent = dmFontGen::GetAscent(ttfresource, scale);
-    float descent = dmFontGen::GetDescent(ttfresource, scale);
-    bool is_sdf = true;
+    item->m_Data = 0;
+    item->m_DataSize = 1 + info->m_CacheCellWidth * info->m_CacheCellHeight;
+    if (info->m_IsSdf)
+    {
+        item->m_Data = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, info->m_Scale, info->m_Padding, info->m_EdgeValue, &item->m_Glyph);
+    }
 
+    if (!item->m_Data) // Some glyphs (e.g. ' ') don't have an image, which is ok
+    {
+        bool is_space = codepoint == ' ';
+        if (!is_space)
+            return 0; // Something went wrong
+
+        item->m_DataSize = 0;
+        item->m_Glyph.m_Width = 0;
+        item->m_Glyph.m_Height = 0;
+        item->m_Glyph.m_Ascent = 0;
+        item->m_Glyph.m_Descent = 0;
+    }
+    return 1;
+}
+
+// Called on the main thread
+static void JobPostProcessGlyph(void* context, void* data, int result)
+{
+    Context* ctx = (Context*)context;
+    JobItem* item = (JobItem*)data;
+    uint32_t codepoint = item->m_Codepoint;
+
+    if (!result)
+    {
+        dmLogWarning("Failed to generate glyph '%c'", codepoint);
+        delete item;
+        return;
+    }
+
+    // The font system takes ownership of the image data
+    dmResource::Result r = dmGameSystem::ResFontAddGlyph(item->m_FontInfo->m_FontResource, codepoint, &item->m_Glyph, item->m_Data, item->m_DataSize);
+    delete item;
+}
+
+// ****************************************************************************************************
+
+static void GenerateGlyph(Context* ctx, FontInfo* info, uint32_t codepoint)
+{
+    JobItem* item = new JobItem;
+    item->m_FontInfo = info;
+    item->m_Codepoint = codepoint;
+    dmJobThread::PushJob(ctx->m_Jobs, JobGenerateGlyph, JobPostProcessGlyph, ctx, item);
+}
+
+static void GenerateGlyphs(Context* ctx, FontInfo* info, const char* text)
+{
     const char* cursor = text;
     uint32_t c = 0;
 
@@ -201,43 +285,8 @@ static void AddGlyphs(FontInfo* info, const char* text)
             continue;
         }
 
-        uint32_t glyph_index = dmFontGen::CodePointToGlyphIndex(ttfresource, c);
-        if (!glyph_index)
-            continue; // No such glyph!
-        num_added++;
-
-        uint32_t celldatasize = cache_cell_width * cache_cell_height + 1;
-        uint8_t* celldata = 0;
-
-        dmGameSystem::FontGlyph fg;
-
-        // Blit the font glyph image into a cache cell image
-        if (is_sdf)
-        {
-            celldata = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, scale, info->m_Padding, info->m_EdgeValue, &fg);
-        }
-
-        if (!celldata)
-        {
-            bool is_space = c == ' ';
-            if (!is_space)
-                continue; // Something went wrong
-
-            celldatasize = 0;
-            fg.m_Width = 0;
-            fg.m_Height = 0;
-            fg.m_Ascent = 0;
-            fg.m_Descent = 0;
-
-            // TODO: Get advance for space!
-        }
-
-        // The font system takes ownership of the image data
-        dmResource::Result r = dmGameSystem::ResFontAddGlyph(info->m_FontResource, c, &fg, celldata, celldatasize);
+        GenerateGlyph(ctx, info, c);
     }
-
-    uint64_t tend = dmTime::GetTime();
-    //printf("Added %u glyphs in %.3fs\n", num_added, (tend-tstart)/1000000.0f);
 }
 
 static void RemoveGlyphs(FontInfo* info, const char* text)
@@ -259,11 +308,19 @@ bool Initialize(dmExtension::Params* params)
 
     g_FontExtContext->m_DefaultSdfPadding = dmConfigFile::GetInt(params->m_ConfigFile, "fontgen.sdf_base_padding", 3);
     g_FontExtContext->m_DefaultSdfEdge = dmConfigFile::GetInt(params->m_ConfigFile, "fontgen.sdf_edge_value", 190);
+
+    dmJobThread::JobThreadCreationParams job_thread_create_param;
+    job_thread_create_param.m_ThreadNames[0] = "FontGenJobThread";
+    job_thread_create_param.m_ThreadCount    = 1;
+    g_FontExtContext->m_Jobs = dmJobThread::Create(job_thread_create_param);
     return true;
 }
 
 void Finalize(dmExtension::Params* params)
 {
+    if (g_FontExtContext->m_Jobs)
+        dmJobThread::Destroy(g_FontExtContext->m_Jobs);
+
     g_FontExtContext->m_FontInfos.Iterate(DeleteFontInfoIter, g_FontExtContext);
     g_FontExtContext->m_FontInfos.Clear();
 
@@ -274,22 +331,8 @@ void Finalize(dmExtension::Params* params)
 
 void Update(dmExtension::Params* params)
 {
-    // TODO: Add worker thread!
-    // TODO: Loop over any finished items
-
-    // static int count = 0;
-    // if (count++ == 20)
-    // {
-    //     FontInfo* info = LoadFont(g_FontExtContext, path, data_path);
-
-    //     if (!info)
-    //         return;
-
-    //     const char* text = "DEFdef";
-    //     AddGlyphs(info, text);
-
-    //     ResFontDebugPrint(info->m_FontResource);
-    // }
+    if (g_FontExtContext->m_Jobs)
+        dmJobThread::Update(g_FontExtContext->m_Jobs, 1000); // Update for max 1 millisecond on non-threaded systems
 }
 
 // Scripting
@@ -325,7 +368,7 @@ bool AddGlyphs(dmhash_t fontc_path_hash, const char* text)
         return false;
     }
 
-    AddGlyphs(*pinfo, text);
+    GenerateGlyphs(ctx, *pinfo, text);
 
     //dmGameSystem::ResFontDebugPrint((*pinfo)->m_FontResource);
     return true;
