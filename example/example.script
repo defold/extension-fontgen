@@ -19,7 +19,14 @@ function init(self)
 	local chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
 	fontgen.add_glyphs(self.font, chars)
-	fontgen.add_glyphs(self.font_outline, chars)
+	local request = fontgen.add_glyphs(self.font_outline, chars, function (self, id, result, errmsg)
+			if not result then
+				print("Request " .. id .." finished with error:", errmsg)
+			else
+				print("Request " .. id .." finished successfully")
+			end
+		end)
+	print("Asynchronous request id:", request)
 end
 
 function final(self)

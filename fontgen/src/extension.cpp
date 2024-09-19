@@ -37,17 +37,71 @@ static int UnloadFont(lua_State* L)
     return 0;
 }
 
+struct CallbackContext
+{
+    dmScript::LuaCallbackInfo* m_Callback;
+    int                        m_Request;
+};
+
+static void AddGlyphsCallback(void* _ctx, int result, const char* errmsg)
+{
+    CallbackContext* ctx = (CallbackContext*)_ctx;
+    dmScript::LuaCallbackInfo* cbk = ctx->m_Callback;
+
+    lua_State* L = dmScript::GetCallbackLuaContext(cbk);
+    DM_LUA_STACK_CHECK(L, 0);
+
+    if (dmScript::SetupCallback(cbk))
+    {
+        int nargs = 3;
+        lua_pushinteger(L, (int)ctx->m_Request);
+        lua_pushboolean(L, result != 0);
+        if (0 != errmsg)
+            lua_pushstring(L, errmsg);
+        else
+            lua_pushnil(L);
+
+        dmScript::PCall(L, 1 + nargs, 0); // self + # user arguments
+
+        dmScript::TeardownCallback(cbk);
+    }
+    dmScript::DestroyCallback(cbk); // only do this if you're not using the callback again
+    delete ctx;
+}
+
 static int AddGlyphs(lua_State* L)
 {
-    DM_LUA_STACK_CHECK(L, 0);
+    DM_LUA_STACK_CHECK(L, 1);
+    int top = lua_gettop(L);
 
     dmhash_t fontc_path_hash = dmScript::CheckHashOrString(L, 1);
     const char* text = luaL_checkstring(L, 2);
 
-    if (!dmFontGen::AddGlyphs(fontc_path_hash, text))
-        return luaL_error(L, "Failed to add glyphs to font %s", dmHashReverseSafe64(fontc_path_hash));
+    dmScript::LuaCallbackInfo* luacbk = 0;
+    if (top > 2 && !lua_isnil(L, 3)) {
+        luacbk = dmScript::CreateCallback(L, 3);
+    }
 
-    return 0;
+    static int requests = 1;
+    int request_id = requests++;
+
+    dmFontGen::FGlyphCallback callback = 0;
+    CallbackContext* cbk_ctx = 0;
+    if (luacbk)
+    {
+        callback = AddGlyphsCallback;
+        cbk_ctx = new CallbackContext;
+        cbk_ctx->m_Callback  = luacbk;
+        cbk_ctx->m_Request = request_id;
+    }
+
+    if (!dmFontGen::AddGlyphs(fontc_path_hash, text, callback, cbk_ctx))
+    {
+        return luaL_error(L, "Failed to add glyphs to font %s", dmHashReverseSafe64(fontc_path_hash));
+    }
+
+    lua_pushinteger(L, request_id);
+    return 1;
 }
 
 static int RemoveGlyphs(lua_State* L)

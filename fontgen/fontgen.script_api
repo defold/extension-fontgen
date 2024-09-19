@@ -54,7 +54,7 @@
 
     parameters:
       - name: fontc_path_hash
-        type: hasH
+        type: hash
         desc: Path hash of the .fontc file in the project
 
 
@@ -62,7 +62,10 @@
 
   - name: add_glyphs
     type: function
-    desc: Adds glyphs to the .fontc resource
+    desc: Asynchronoously sdds glyphs to the .fontc resource.
+    returns:
+    - desc: Returns a request id, used in the callback
+      type: integer
 
     parameters:
       - name: fontc_path_hash
@@ -72,6 +75,27 @@
       - name: text
         type: string
         desc: Utf-8 string containing glyphs to add to the .fontc
+              *Note* No checks for duplicate glyphs is done.
+
+      - name: callback
+        type: function
+        desc: Function to be called after the last glyph was processed. May be nil.
+        parameters:
+        - name: self
+          type: object
+          desc: The script instance that called `add_glyphs`
+
+        - name: request
+          type: int
+          desc: The request id returned by `add_glyphs`
+
+        - name: result
+          type: bool
+          desc: True if all glyphs were added successfully
+
+        - name: errmsg
+          type: string
+          desc: Error string if a glyph wasn't generated or added successfully
 
 
 #*****************************************************************************************************

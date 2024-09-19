@@ -200,11 +200,23 @@ static void DeleteFontInfoIter(Context* ctx, const dmhash_t* hash, FontInfo** in
 
 // ****************************************************************************************************
 
+struct JobStatus
+{
+    uint32_t    m_Count;    // Number of job items pushed
+    uint32_t    m_Failures; // Number of failed job items
+    const char* m_Error; // First error sets this string
+};
+
 struct JobItem
 {
     // input
-    FontInfo* m_FontInfo;
-    uint32_t  m_Codepoint;
+    FontInfo*       m_FontInfo;
+    uint32_t        m_Codepoint;
+    //
+    JobStatus*      m_Status;
+    FGlyphCallback  m_Callback;
+    void*           m_CallbackCtx;
+    bool            m_LastItem; // true if it's the last item in the batch
     // output
     dmGameSystem::FontGlyph m_Glyph;
     uint8_t*                m_Data;     // May be 0. First byte is the compression (0=no compression, 1=deflate)
@@ -247,50 +259,106 @@ static int JobGenerateGlyph(void* context, void* data)
     return 1;
 }
 
+static void SetFailedStatus(JobItem* item, const char* msg)
+{
+    JobStatus* status = item->m_Status;
+    status->m_Failures++;
+    if (status->m_Error == 0)
+    {
+        status->m_Error = strdup(msg);
+    }
+
+    dmLogError("%s", msg); // log for each error in a batch
+}
+
+static void InvokeCallback(JobItem* item)
+{
+    JobStatus* status = item->m_Status;
+    if (item->m_Callback) // only the last item has this callback
+    {
+        item->m_Callback(item->m_CallbackCtx, status->m_Failures == 0, status->m_Error);
+    }
+}
+
+static void DeleteItem(JobItem* item)
+{
+    if (item->m_LastItem)
+    {
+        delete item->m_Status;
+    }
+    delete item;
+}
+
 // Called on the main thread
 static void JobPostProcessGlyph(void* context, void* data, int result)
 {
     Context* ctx = (Context*)context;
     JobItem* item = (JobItem*)data;
+    JobStatus* status = item->m_Status;
     uint32_t codepoint = item->m_Codepoint;
 
     if (!result)
     {
-        dmLogWarning("Failed to generate glyph '%c'", codepoint);
-        delete item;
+        char msg[256];
+        dmSnPrintf(msg, sizeof(msg), "Failed to generate glyph '%c'", codepoint);
+        SetFailedStatus(item, msg);
+        InvokeCallback(item);
+        DeleteItem(item);
         return;
     }
 
     // The font system takes ownership of the image data
     dmResource::Result r = dmGameSystem::ResFontAddGlyph(item->m_FontInfo->m_FontResource, codepoint, &item->m_Glyph, item->m_Data, item->m_DataSize);
-    delete item;
+
+    if (dmResource::RESULT_OK != r)
+    {
+        char msg[256];
+        dmSnPrintf(msg, sizeof(msg), "Failed to add glyph '%c': result: %d", codepoint, r);
+        SetFailedStatus(item, msg);
+    }
+
+    InvokeCallback(item); // reports either first error, or success
+    DeleteItem(item);
 }
 
 // ****************************************************************************************************
 
-static void GenerateGlyph(Context* ctx, FontInfo* info, uint32_t codepoint)
+static void GenerateGlyph(Context* ctx, FontInfo* info, uint32_t codepoint, bool last_item, JobStatus* status, FGlyphCallback cbk, void* cbk_ctx)
 {
     JobItem* item = new JobItem;
     item->m_FontInfo = info;
     item->m_Codepoint = codepoint;
+    item->m_Callback = cbk;
+    item->m_CallbackCtx = cbk_ctx;
+    item->m_Status = status;
+    item->m_LastItem = last_item;
     dmJobThread::PushJob(ctx->m_Jobs, JobGenerateGlyph, JobPostProcessGlyph, ctx, item);
 }
 
-static void GenerateGlyphs(Context* ctx, FontInfo* info, const char* text)
+static void GenerateGlyphs(Context* ctx, FontInfo* info, const char* text, FGlyphCallback cbk, void* cbk_ctx)
 {
+    uint32_t len        = dmUtf8::StrLen(text);
+
+    JobStatus* status   = new JobStatus;
+    status->m_Count     = len;
+    status->m_Failures  = 0;
+
     const char* cursor = text;
     uint32_t c = 0;
-
-    uint32_t num_added = 0;
+    uint32_t index  = 0;
     while ((c = dmUtf8::NextChar(&cursor)))
     {
-        if (dmGameSystem::ResFontHasGlyph(info->m_FontResource, c))
-        {
-            //printf("  already existed: '%c'\n", c);
-            continue;
-        }
+        ++index;
+        bool last_item = len == index;
 
-        GenerateGlyph(ctx, info, c);
+        FGlyphCallback last_callback = 0;
+        void*          last_callback_ctx = 0;
+        if (last_item)
+        {
+            last_callback = cbk;
+            last_callback_ctx = cbk_ctx;
+        }
+        GenerateGlyph(ctx, info, c, last_item, status, last_callback, last_callback_ctx);
     }
 }
 
@@ -363,7 +431,7 @@ bool UnloadFont(dmhash_t fontc_path_hash)
 }
 
 
-bool AddGlyphs(dmhash_t fontc_path_hash, const char* text)
+bool AddGlyphs(dmhash_t fontc_path_hash, const char* text, FGlyphCallback cbk, void* cbk_ctx)
 {
     Context* ctx = g_FontExtContext;
     FontInfo** pinfo = ctx->m_FontInfos.Get(fontc_path_hash);
@@ -373,7 +441,7 @@ bool AddGlyphs(dmhash_t fontc_path_hash, const char* text)
         return false;
     }
 
-    GenerateGlyphs(ctx, *pinfo, text);
+    GenerateGlyphs(ctx, *pinfo, text, cbk, cbk_ctx);
 
     //dmGameSystem::ResFontDebugPrint((*pinfo)->m_FontResource);
     return true;

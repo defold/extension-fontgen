@@ -13,6 +13,9 @@ namespace dmFontGen
 
     bool LoadFont(const char* fontc_path, const char* ttf_path);
     bool UnloadFont(dmhash_t fontc_path_hash);
-    bool AddGlyphs(dmhash_t fontc_path_hash, const char* text);
+
+    typedef void (*FGlyphCallback)(void* cbk_ctx, int result, const char* errmsg);
+
+    bool AddGlyphs(dmhash_t fontc_path_hash, const char* text, FGlyphCallback cbk, void* cbk_ctx);
     bool RemoveGlyphs(dmhash_t fontc_path_hash, const char* text);
 }
