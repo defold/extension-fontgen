@@ -24,6 +24,11 @@
 #include <dmsdk/dlib/math.h>
 #include <dmsdk/dlib/dstrings.h>
 
+#define DM_HAS_THREADS
+#if defined(__EMSCRIPTEN__)
+    #undef DM_HAS_THREADS
+#endif
+
 #if defined(DM_HAS_THREADS)
     #include <dmsdk/dlib/condition_variable.h>
     #include <dmsdk/dlib/mutex.h>
