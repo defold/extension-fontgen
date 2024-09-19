@@ -1,7 +1,0 @@
-font: "/builtins/fonts/vera_mo_bd.ttf"
-material: "/builtins/fonts/font-df.material"
-size: 28
-output_format: TYPE_DISTANCE_FIELD
-cache_width: 256
-cache_height: 256
-characters: "A"

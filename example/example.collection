@@ -9,6 +9,12 @@ embedded_instances {
   ""
 }
 embedded_instances {
+  id: "generated"
+  children: "Normal"
+  children: "Outline"
+  data: ""
+}
+embedded_instances {
   id: "Normal"
   data: "embedded_components {\n"
   "  id: \"label\"\n"
@@ -55,6 +61,65 @@ embedded_instances {
   position {
     x: 475.0
     y: 382.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "vanilla"
+  children: "Normal1"
+  children: "Outline1"
+  data: ""
+}
+embedded_instances {
+  id: "Normal1"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 258.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "Outline1"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox \\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto_outline.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 155.0
   }
   scale3 {
     x: 2.0

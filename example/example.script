@@ -1,5 +1,10 @@
 function init(self)
 
+	if not fontgen then
+		print("'fontgen' not found")
+		return
+	end
+
 	local fontc = "/assets/fonts/roboto.fontc"
 	local ttf = "/assets/fonts/Roboto/Roboto-Bold.ttf"
 	local fontc_hash, err = fontgen.load_font(fontc, ttf)
@@ -30,9 +35,11 @@ function init(self)
 end
 
 function final(self)
-	fontgen.remove_glyphs(self.font, "DEFdef")
-	fontgen.unload_font(self.font)
-	fontgen.unload_font(self.font_outline)
+	if fontgen ~= nil then
+		fontgen.remove_glyphs(self.font, "DEFdef")
+		fontgen.unload_font(self.font)
+		fontgen.unload_font(self.font_outline)
+	end
 end
 
 function update(self, dt)

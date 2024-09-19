@@ -153,22 +153,29 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     info->m_Padding = ctx->m_DefaultSdfPadding;
     if (dmRenderDDF::MODE_MULTI_LAYER == font_info.m_RenderMode)
     {
-        info->m_Padding += font_info.m_ShadowBlur + font_info.m_OutlineWidth; // 3 is arbitrary but resembles the output from out generator
+        // see Fontc.java
+        const float rootOf2 = sqrtf(2.0f);
+
+        // x2 to make it more visually equal to our previous generation
+        if (font_info.m_OutlineWidth > 0)
+            info->m_Padding += 2.0f * (font_info.m_OutlineWidth + rootOf2);
+        if (font_info.m_ShadowBlur > 0)
+            info->m_Padding += 2.0f * (font_info.m_ShadowBlur + rootOf2);
     }
 
     info->m_EdgeValue    = ctx->m_DefaultSdfEdge;
     info->m_Scale        = dmFontGen::SizeToScale(info->m_TTFResource, font_info.m_Size);
 
     // TODO: Support bitmap fonts
-    info->m_IsSdf        = true;
+    info->m_IsSdf        = dmRenderDDF::TYPE_DISTANCE_FIELD == font_info.m_OutputFormat;
 
     uint32_t cell_width = 0;
     uint32_t cell_height = 0;
     uint32_t max_ascent = 0;
     dmFontGen::GetCellSize(info->m_TTFResource, &cell_width, &cell_height, &max_ascent);
 
-    info->m_CacheCellWidth = cell_width*info->m_Scale;
-    info->m_CacheCellHeight = cell_height*info->m_Scale;
+    info->m_CacheCellWidth = info->m_Padding + cell_width*info->m_Scale;
+    info->m_CacheCellHeight = info->m_Padding + cell_height*info->m_Scale;
     info->m_CacheCellMaxAscent = info->m_Padding + max_ascent*info->m_Scale;
     r = ResFontSetCacheCellSize(info->m_FontResource, info->m_CacheCellWidth, info->m_CacheCellHeight, info->m_CacheCellMaxAscent);
 
@@ -202,6 +209,7 @@ static void DeleteFontInfoIter(Context* ctx, const dmhash_t* hash, FontInfo** in
 
 struct JobStatus
 {
+    uint64_t    m_TimeGlyphGen;
     uint32_t    m_Count;    // Number of job items pushed
     uint32_t    m_Failures; // Number of failed job items
     const char* m_Error; // First error sets this string
@@ -231,6 +239,8 @@ static int JobGenerateGlyph(void* context, void* data)
     FontInfo* info = item->m_FontInfo;
     uint32_t codepoint = item->m_Codepoint;
 
+    uint64_t tstart = dmTime::GetTime();
+
     //
     TTFResource* ttfresource = info->m_TTFResource;
     uint32_t glyph_index = dmFontGen::CodePointToGlyphIndex(ttfresource, codepoint);
@@ -256,6 +266,12 @@ static int JobGenerateGlyph(void* context, void* data)
         item->m_Glyph.m_Ascent = 0;
         item->m_Glyph.m_Descent = 0;
     }
+
+    uint64_t tend = dmTime::GetTime();
+// TODO: Protect this using a spinlock
+    JobStatus* status = item->m_Status;
+    status->m_TimeGlyphGen += tend - tstart;
+
     return 1;
 }
 
@@ -277,6 +293,10 @@ static void InvokeCallback(JobItem* item)
     if (item->m_Callback) // only the last item has this callback
     {
         item->m_Callback(item->m_CallbackCtx, status->m_Failures == 0, status->m_Error);
+
+// // TODO: Hide this behind a verbosity flag
+// // TODO: Protect this using a spinlock
+//         dmLogInfo("Generated %u glyphs in %.2f ms", status->m_Count, status->m_TimeGlyphGen/1000.0f);
     }
 }
 
@@ -339,9 +359,11 @@ static void GenerateGlyphs(Context* ctx, FontInfo* info, const char* text, FGlyp
 {
     uint32_t len        = dmUtf8::StrLen(text);
 
-    JobStatus* status   = new JobStatus;
-    status->m_Count     = len;
-    status->m_Failures  = 0;
+    JobStatus* status      = new JobStatus;
+    status->m_TimeGlyphGen = 0;
+    status->m_Count        = len;
+    status->m_Failures     = 0;
+    status->m_Error        = 0;
 
     const char* cursor = text;
     uint32_t c = 0;
@@ -379,6 +401,7 @@ bool Initialize(dmExtension::Params* params)
     g_FontExtContext = new Context;
     g_FontExtContext->m_ResourceFactory = params->m_ResourceFactory;
 
+    // 3 is arbitrary but resembles the output from out generator
     g_FontExtContext->m_DefaultSdfPadding = dmConfigFile::GetInt(params->m_ConfigFile, "fontgen.sdf_base_padding", 3);
     g_FontExtContext->m_DefaultSdfEdge = dmConfigFile::GetInt(params->m_ConfigFile, "fontgen.sdf_edge_value", 190);
 
