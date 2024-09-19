@@ -139,10 +139,23 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     if (dmResource::RESULT_OK != r)
     {
         dmLogError("Failed to get font info from '%s'", fontc_path);
+        DeleteFont(ctx, info);
         return 0;
     }
 
-    info->m_Padding      = ctx->m_DefaultSdfPadding + font_info.m_ShadowBlur + font_info.m_OutlineWidth; // 3 is arbitrary but resembles the output from out generator
+    if (dmRenderDDF::TYPE_DISTANCE_FIELD != font_info.m_OutputFormat)
+    {
+        dmLogError("Currently only distance field fonts are supported: %s", fontc_path);
+        DeleteFont(ctx, info);
+        return 0;
+    }
+
+    info->m_Padding = ctx->m_DefaultSdfPadding;
+    if (dmRenderDDF::MODE_MULTI_LAYER == font_info.m_RenderMode)
+    {
+        info->m_Padding += font_info.m_ShadowBlur + font_info.m_OutlineWidth; // 3 is arbitrary but resembles the output from out generator
+    }
+
     info->m_EdgeValue    = ctx->m_DefaultSdfEdge;
     info->m_Scale        = dmFontGen::SizeToScale(info->m_TTFResource, font_info.m_Size);
 
@@ -159,15 +172,6 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     info->m_CacheCellMaxAscent = info->m_Padding + max_ascent*info->m_Scale;
     r = ResFontSetCacheCellSize(info->m_FontResource, info->m_CacheCellWidth, info->m_CacheCellHeight, info->m_CacheCellMaxAscent);
 
-TTFResource* ttfresource = info->m_TTFResource;
-
-float scale = info->m_Scale;
-float ascent = dmFontGen::GetAscent(ttfresource, scale);
-float descent = dmFontGen::GetDescent(ttfresource, scale);
-
-
-
-
     if (ctx->m_FontInfos.Full())
     {
         uint32_t cap = ctx->m_FontInfos.Capacity() + 8;
@@ -179,6 +183,7 @@ float descent = dmFontGen::GetDescent(ttfresource, scale);
     return info;
 }
 
+// Only called at shutdown of the extension
 static void DeleteFontInfoIter(Context* ctx, const dmhash_t* hash, FontInfo** infop)
 {
     (void)hash;
