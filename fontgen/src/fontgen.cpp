@@ -23,7 +23,8 @@ struct FontInfo
     uint32_t                    m_CacheCellWidth;
     uint32_t                    m_CacheCellHeight;
     uint32_t                    m_CacheCellMaxAscent;
-    bool                        m_IsSdf;
+    uint8_t                     m_IsSdf:1;
+    uint8_t                     m_HasShadow:1;
 };
 
 struct Context
@@ -163,6 +164,9 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
             info->m_Padding += 2.0f * (font_info.m_ShadowBlur + rootOf2);
     }
 
+    // See Fontc.java. If we have shadow blur, we need 3 channels
+    info->m_HasShadow    = font_info.m_ShadowAlpha > 0.0f && font_info.m_ShadowBlur > 0.0f;
+
     info->m_EdgeValue    = ctx->m_DefaultSdfEdge;
     info->m_Scale        = dmFontGen::SizeToScale(info->m_TTFResource, font_info.m_Size);
 
@@ -252,6 +256,36 @@ static int JobGenerateGlyph(void* context, void* data)
     if (info->m_IsSdf)
     {
         item->m_Data = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, info->m_Scale, info->m_Padding, info->m_EdgeValue, &item->m_Glyph);
+    }
+
+    if (info->m_HasShadow && item->m_Data)
+    {
+        // Strictly, we can render non-blurred shadow, with a single channel
+        // so this case is about blurred shadow
+
+// TODO: Add a second blurred image into the blue channel, offset by x/y
+
+        // Make a copy
+        item->m_Glyph.m_Channels = 3;
+        uint32_t w = item->m_Glyph.m_Width;
+        uint32_t h = item->m_Glyph.m_Height;
+        uint32_t ch = item->m_Glyph.m_Channels;
+        uint8_t* mem = (uint8_t*)malloc(w*h*ch + 1);
+        uint8_t* rgb = mem + 1;
+        for (int y = 0; y < item->m_Glyph.m_Height; ++y)
+        {
+            for (int x = 0; x < item->m_Glyph.m_Width; ++x)
+            {
+                uint8_t value = item->m_Data[y * w + x];
+                rgb[y * (w * ch) + (x * ch) + 0] = value;
+                rgb[y * (w * ch) + (x * ch) + 1] = value;
+                rgb[y * (w * ch) + (x * ch) + 2] = value;
+            }
+        }
+        mem[0] = item->m_Data[0]; // compression
+
+        free((void*)item->m_Data);
+        item->m_Data = mem;
     }
 
     if (!item->m_Data) // Some glyphs (e.g. ' ') don't have an image, which is ok

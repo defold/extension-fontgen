@@ -5,21 +5,25 @@ function init(self)
 		return
 	end
 
-	local fontc = "/assets/fonts/roboto.fontc"
 	local ttf = "/assets/fonts/Roboto/Roboto-Bold.ttf"
-	local fontc_hash, err = fontgen.load_font(fontc, ttf)
+	local fontc_hash, err = fontgen.load_font("/assets/fonts/roboto.fontc", ttf)
 	if err ~= nil then
 		print("Result:", fontc_hash, err)
 	end
 
-	local fontc = "/assets/fonts/roboto_outline.fontc"
-	local fontc_outline_hash, err = fontgen.load_font(fontc, ttf)
+	local fontc_outline_hash, err = fontgen.load_font("/assets/fonts/roboto_outline.fontc", ttf)
 	if err ~= nil then
 		print("Result:", fontc_outline_hash, err)
 	end
 
+	local fontc_outline_shadow_hash, err = fontgen.load_font("/assets/fonts/roboto_outline_shadow.fontc", ttf)
+	if err ~= nil then
+		print("Result:", fontc_outline_shadow_hash, err)
+	end
+
 	self.font = fontc_hash
 	self.font_outline = fontc_outline_hash
+	self.font_outline_shadow = fontc_outline_shadow_hash
 
 	local chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
@@ -32,6 +36,8 @@ function init(self)
 			end
 		end)
 	print("Asynchronous request id:", request)
+
+	fontgen.add_glyphs(self.font_outline_shadow, chars)
 end
 
 function final(self)
@@ -39,6 +45,7 @@ function final(self)
 		fontgen.remove_glyphs(self.font, "DEFdef")
 		fontgen.unload_font(self.font)
 		fontgen.unload_font(self.font_outline)
+		fontgen.unload_font(self.font_outline_shadow)
 	end
 end
 

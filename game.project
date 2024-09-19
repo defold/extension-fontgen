@@ -18,3 +18,9 @@ include_dirs = myextension
 [native_extension]
 app_manifest = /game.appmanifest
 
+[render]
+clear_color_red = 0.3
+clear_color_green = 0.3
+clear_color_blue = 0.3
+clear_color_alpha = 1.0
+

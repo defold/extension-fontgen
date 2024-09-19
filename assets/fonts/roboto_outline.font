@@ -7,4 +7,4 @@ output_format: TYPE_DISTANCE_FIELD
 cache_width: 256
 cache_height: 256
 render_mode: MODE_MULTI_LAYER
-characters: ".D"
+characters: "."

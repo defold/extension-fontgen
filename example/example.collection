@@ -11,8 +11,25 @@ embedded_instances {
 embedded_instances {
   id: "generated"
   children: "Normal"
+  children: "OutShadow"
   children: "Outline"
-  data: ""
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "text: \\\"Generated:\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 229.0\n"
+  "    y: 539.0\n"
+  "  }\n"
+  "}\n"
+  ""
 }
 embedded_instances {
   id: "Normal"
@@ -31,7 +48,7 @@ embedded_instances {
   ""
   position {
     x: 475.0
-    y: 485.0
+    y: 473.0
   }
   scale3 {
     x: 2.0
@@ -60,7 +77,7 @@ embedded_instances {
   ""
   position {
     x: 475.0
-    y: 382.0
+    y: 399.0
   }
   scale3 {
     x: 2.0
@@ -69,12 +86,29 @@ embedded_instances {
 }
 embedded_instances {
   id: "vanilla"
-  children: "Normal1"
-  children: "Outline1"
-  data: ""
+  children: "NormalV"
+  children: "OutShadowV"
+  children: "OutlineV"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "text: \\\"Offline:\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 229.0\n"
+  "    y: 262.0\n"
+  "  }\n"
+  "}\n"
+  ""
 }
 embedded_instances {
-  id: "Normal1"
+  id: "NormalV"
   data: "embedded_components {\n"
   "  id: \"label\"\n"
   "  type: \"label\"\n"
@@ -90,7 +124,7 @@ embedded_instances {
   ""
   position {
     x: 475.0
-    y: 258.0
+    y: 206.0
   }
   scale3 {
     x: 2.0
@@ -98,7 +132,7 @@ embedded_instances {
   }
 }
 embedded_instances {
-  id: "Outline1"
+  id: "OutlineV"
   data: "embedded_components {\n"
   "  id: \"label\"\n"
   "  type: \"label\"\n"
@@ -119,7 +153,65 @@ embedded_instances {
   ""
   position {
     x: 475.0
-    y: 155.0
+    y: 138.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "OutShadowV"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox \\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 68.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "OutShadow"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox \\\"\\n"
+  "font: \\\"/assets/fonts/roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 324.0
   }
   scale3 {
     x: 2.0
