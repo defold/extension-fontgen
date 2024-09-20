@@ -263,22 +263,26 @@ static int JobGenerateGlyph(void* context, void* data)
         // Strictly, we can render non-blurred shadow, with a single channel
         // so this case is about blurred shadow
 
-// TODO: Add a second blurred image into the blue channel, offset by x/y
+// TODO: Blur the blue channel
 
         // Make a copy
         item->m_Glyph.m_Channels = 3;
         uint32_t w = item->m_Glyph.m_Width;
         uint32_t h = item->m_Glyph.m_Height;
         uint32_t ch = item->m_Glyph.m_Channels;
-        uint8_t* mem = (uint8_t*)malloc(w*h*ch + 1);
+        item->m_DataSize = w*h*ch + 1;
+
+        uint8_t* mem = (uint8_t*)malloc(item->m_DataSize);
         uint8_t* rgb = mem + 1;
-        for (int y = 0; y < item->m_Glyph.m_Height; ++y)
+
+
+        for (int y = 0; y < h; ++y)
         {
-            for (int x = 0; x < item->m_Glyph.m_Width; ++x)
+            for (int x = 0; x < w; ++x)
             {
-                uint8_t value = item->m_Data[y * w + x];
+                uint8_t value =         item->m_Data[1 + y * w + x];
                 rgb[y * (w * ch) + (x * ch) + 0] = value;
-                rgb[y * (w * ch) + (x * ch) + 1] = value;
+                rgb[y * (w * ch) + (x * ch) + 1] = 0;
                 rgb[y * (w * ch) + (x * ch) + 2] = value;
             }
         }
