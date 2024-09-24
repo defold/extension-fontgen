@@ -4,7 +4,7 @@ size: 28
 outline_alpha: 1.0
 outline_width: 2.5
 shadow_alpha: 1.0
-shadow_blur: 5
+shadow_blur: 0
 shadow_x: 2.0
 shadow_y: -2.0
 output_format: TYPE_DISTANCE_FIELD
