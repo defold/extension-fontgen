@@ -1,8 +1,10 @@
 # Font extension
 
+Defold [native extension](https://defold.com/manuals/extensions/) for interacting with fonts at runtime.
+
 This extension allows for extending an existing Defold font (.fontc) with more glyphs at runtime.
 
-This allows for
+It allows for smaller package sizes, as well as less runtime memory footprint.
 
 Known limitations:
 * You need to add your .ttf font as a [Custom Resource](https://defold.com/manuals/project-settings/#custom-resources)
@@ -11,10 +13,15 @@ Known limitations:
 * Currently only supports SDF fonts
 * No caching to disc of the the generated glyphs
 
+![](./example.png)
 
 # Game.project Properties
 
 See [ext.properties](./fontgen/ext.properties) for relevant settings.
+
+# Api
+
+[Script Api](./fontgen/fontgen.script_api)
 
 
 # Font Credits
