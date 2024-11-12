@@ -82,14 +82,14 @@ fontgen.unload_font(self.font)
 
 # Game.project Properties
 
-_See [ext.properties](http://github.com/defold/extension-font/fontgen/ext.properties) for the up-to-date list of settings._
+_See [ext.properties](http://github.com/defold/extension-fontgen/fontgen/ext.properties) for the up-to-date list of settings._
 
 * `fontgen.sdf_base_padding` - The base padding when generating sdf glyphs [0-255]
 * `fontgen.sdf_edge_value` - The on edge when generating sdf glyphs. [0-255]
 
 # Api
 
-[Script Api](https://defold.com/extension-font/fontgen_api/)
+[Script Api](https://defold.com/extension-fontgen/fontgen_api/)
 
 
 # Font Credits
