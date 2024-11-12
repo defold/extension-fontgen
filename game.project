@@ -13,7 +13,7 @@ title = extension-font
 custom_resources = /assets/fonts/Roboto/Roboto-Bold.ttf
 
 [library]
-include_dirs = myextension
+include_dirs = fontgen
 
 [native_extension]
 app_manifest = /game.appmanifest
