@@ -38,6 +38,13 @@ struct Context
 
 Context* g_FontExtContext = 0;
 
+static const uint32_t ZERO_WIDTH_SPACE_UNICODE = 0x200b;
+
+static inline bool IsWhiteSpace(uint32_t c)
+{
+    return c == ' ' || c == '\n' || c == '\t' || c == ZERO_WIDTH_SPACE_UNICODE;
+}
+
 static bool CheckType(HResourceFactory factory, const char* path, const char** types, uint32_t num_types)
 {
     HResourceDescriptor rd;
@@ -294,7 +301,7 @@ static int JobGenerateGlyph(void* context, void* data)
 
     if (!item->m_Data) // Some glyphs (e.g. ' ') don't have an image, which is ok
     {
-        bool is_space = codepoint == ' ';
+        bool is_space = IsWhiteSpace(codepoint);
         if (!is_space)
             return 0; // Something went wrong
 
