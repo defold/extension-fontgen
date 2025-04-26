@@ -20,9 +20,6 @@ struct FontInfo
     int                         m_EdgeValue;
     float                       m_Scale;
 
-    uint32_t                    m_CacheCellWidth;
-    uint32_t                    m_CacheCellHeight;
-    uint32_t                    m_CacheCellMaxAscent;
     uint8_t                     m_IsSdf:1;
     uint8_t                     m_HasShadow:1;
 };
@@ -180,15 +177,12 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     // TODO: Support bitmap fonts
     info->m_IsSdf        = dmRenderDDF::TYPE_DISTANCE_FIELD == font_info.m_OutputFormat;
 
-    uint32_t cell_width = 0;
-    uint32_t cell_height = 0;
-    uint32_t max_ascent = 0;
-    dmFontGen::GetCellSize(info->m_TTFResource, &cell_width, &cell_height, &max_ascent);
-
-    info->m_CacheCellWidth = info->m_Padding + cell_width*info->m_Scale;
-    info->m_CacheCellHeight = info->m_Padding + cell_height*info->m_Scale;
-    info->m_CacheCellMaxAscent = info->m_Padding + max_ascent*info->m_Scale;
-    r = ResFontSetCacheCellSize(info->m_FontResource, info->m_CacheCellWidth, info->m_CacheCellHeight, info->m_CacheCellMaxAscent);
+    // This returns a too large size, which is impractical, and causes the cache to be filled too quickly
+    // Instead, we do the cell size check in the engine, when adding more dybnamic glyphs
+    // uint32_t cell_width = 0;
+    // uint32_t cell_height = 0;
+    // uint32_t max_ascent = 0;
+    // dmFontGen::GetCellSize(info->m_TTFResource, &cell_width, &cell_height, &max_ascent);
 
     if (ctx->m_FontInfos.Full())
     {
@@ -258,8 +252,11 @@ static int JobGenerateGlyph(void* context, void* data)
     if (!glyph_index)
         return 0;
 
+    uint32_t cell_width, cell_height, cell_ascent;
+    dmGameSystem::ResFontGetCacheCellSize(info->m_FontResource, &cell_width, &cell_height, &cell_ascent);
+
     item->m_Data = 0;
-    item->m_DataSize = 1 + info->m_CacheCellWidth * info->m_CacheCellHeight;
+    item->m_DataSize = 1 + cell_width * cell_height;
     if (info->m_IsSdf)
     {
         item->m_Data = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, info->m_Scale, info->m_Padding, info->m_EdgeValue, &item->m_Glyph);
