@@ -41,7 +41,7 @@ static const uint32_t IDEOGRAPHIC_SPACE_UNICODE = 0x3000;
 
 static inline bool IsWhiteSpace(uint32_t c)
 {
-    return c == ' ' || c == '\n' || c == '\t' || c == ZERO_WIDTH_SPACE_UNICODE || c == NO_BREAK_SPACE_UNICODE || IDEOGRAPHIC_SPACE_UNICODE;
+    return c == ' ' || c == '\n' || c == '\t' || c == ZERO_WIDTH_SPACE_UNICODE || c == NO_BREAK_SPACE_UNICODE || c == IDEOGRAPHIC_SPACE_UNICODE;
 }
 
 static bool CheckType(HResourceFactory factory, const char* path, const char** types, uint32_t num_types)
