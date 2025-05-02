@@ -36,10 +36,12 @@ struct Context
 Context* g_FontExtContext = 0;
 
 static const uint32_t ZERO_WIDTH_SPACE_UNICODE = 0x200b;
+static const uint32_t NO_BREAK_SPACE_UNICODE = 0x00a0;
+static const uint32_t IDEOGRAPHIC_SPACE_UNICODE = 0x3000;
 
 static inline bool IsWhiteSpace(uint32_t c)
 {
-    return c == ' ' || c == '\n' || c == '\t' || c == ZERO_WIDTH_SPACE_UNICODE;
+    return c == ' ' || c == '\n' || c == '\t' || c == ZERO_WIDTH_SPACE_UNICODE || c == NO_BREAK_SPACE_UNICODE || IDEOGRAPHIC_SPACE_UNICODE;
 }
 
 static bool CheckType(HResourceFactory factory, const char* path, const char** types, uint32_t num_types)
@@ -284,7 +286,7 @@ static int JobGenerateGlyph(void* context, void* data)
         {
             for (int x = 0; x < w; ++x)
             {
-                uint8_t value =         item->m_Data[1 + y * w + x];
+                uint8_t value = item->m_Data[1 + y * w + x];
                 rgb[y * (w * ch) + (x * ch) + 0] = value;
                 rgb[y * (w * ch) + (x * ch) + 1] = 0;
                 rgb[y * (w * ch) + (x * ch) + 2] = value;
