@@ -25,7 +25,7 @@ function init(self)
 	self.font_outline = fontc_outline_hash
 	self.font_outline_shadow = fontc_outline_shadow_hash
 
-	local chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+	local chars = " \n!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
 	fontgen.add_glyphs(self.font, chars)
 	local request = fontgen.add_glyphs(self.font_outline, chars, function (self, id, result, errmsg)
