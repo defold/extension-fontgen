@@ -179,6 +179,11 @@ static FontInfo* LoadFont(Context* ctx, const char* fontc_path, const char* ttf_
     // TODO: Support bitmap fonts
     info->m_IsSdf        = dmRenderDDF::TYPE_DISTANCE_FIELD == font_info.m_OutputFormat;
 
+    // In our system, both ascent/descent are positive distances from the baseline
+    float max_ascent = dmFontGen::GetAscent(info->m_TTFResource, info->m_Scale);
+    float max_descent = -dmFontGen::GetDescent(info->m_TTFResource, info->m_Scale);
+    dmGameSystem::ResFontSetLineHeight(info->m_FontResource, max_ascent, max_descent);
+
     // This returns a too large size, which is impractical, and causes the cache to be filled too quickly
     // Instead, we do the cell size check in the engine, when adding more dybnamic glyphs
     // uint32_t cell_width = 0;

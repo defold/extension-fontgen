@@ -41,21 +41,13 @@ platforms:
       libs: [graphics_vulkan]
       linkFlags: []
       jetifier: true
-  arm64-osx:
+  osx:
     context:
-      excludeLibs: [platform, graphics]
-      excludeSymbols: [GraphicsAdapterOpenGL]
-      symbols: [GraphicsAdapterVulkan]
-      libs: [platform_vulkan, graphics_vulkan, MoltenVK]
-      frameworks: [Metal, IOSurface, QuartzCore]
-      linkFlags: []
-  x86_64-osx:
-    context:
-      excludeLibs: [platform, graphics]
-      excludeSymbols: [GraphicsAdapterOpenGL]
-      symbols: [GraphicsAdapterVulkan]
-      libs: [platform_vulkan, graphics_vulkan, MoltenVK]
-      frameworks: [Metal, IOSurface, QuartzCore]
+      excludeLibs: []
+      excludeSymbols: []
+      symbols: []
+      libs: []
+      frameworks: []
       linkFlags: []
   x86_64-linux:
     context:

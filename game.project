@@ -15,9 +15,6 @@ custom_resources = /assets/fonts/Roboto/Roboto-Bold.ttf
 [library]
 include_dirs = fontgen
 
-[native_extension]
-app_manifest = /game.appmanifest
-
 [render]
 clear_color_red = 0.3
 clear_color_green = 0.3
