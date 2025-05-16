@@ -253,13 +253,17 @@ static int JobGenerateGlyph(void* context, void* data)
 
     uint64_t tstart = dmTime::GetTime();
 
+    item->m_Data = 0;
+    item->m_DataSize = 0;
+
+    bool is_whitespace = IsWhiteSpace(codepoint);
+
     //
     TTFResource* ttfresource = info->m_TTFResource;
     uint32_t glyph_index = dmFontGen::CodePointToGlyphIndex(ttfresource, codepoint);
     if (!glyph_index)
     {
-        bool is_space = IsWhiteSpace(codepoint);
-        if (is_space)
+        if (is_whitespace)
         {
             return 1; // We deal with white spaces in the next callback
         }
@@ -270,11 +274,10 @@ static int JobGenerateGlyph(void* context, void* data)
     uint32_t cell_width, cell_height, cell_ascent;
     dmGameSystem::ResFontGetCacheCellSize(info->m_FontResource, &cell_width, &cell_height, &cell_ascent);
 
-    item->m_Data = 0;
-    item->m_DataSize = 1 + cell_width * cell_height;
     if (info->m_IsSdf)
     {
         item->m_Data = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, info->m_Scale, info->m_Padding, info->m_EdgeValue, &item->m_Glyph);
+        item->m_DataSize = 1 + cell_width * cell_height;
     }
 
     if (info->m_HasShadow && item->m_Data)
@@ -313,8 +316,7 @@ static int JobGenerateGlyph(void* context, void* data)
 
     if (!item->m_Data) // Some glyphs (e.g. ' ') don't have an image, which is ok
     {
-        bool is_space = IsWhiteSpace(codepoint);
-        if (!is_space)
+        if (!is_whitespace)
             return 0; // Something went wrong
 
         item->m_DataSize = 0;
