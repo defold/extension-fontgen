@@ -289,6 +289,7 @@ static int JobGenerateGlyph(void* context, void* data)
 
     item->m_Data = 0;
     item->m_DataSize = 0;
+    memset(&item->m_Glyph, 0, sizeof(item->m_Glyph));
 
     bool is_whitespace = IsWhiteSpace(codepoint);
 
