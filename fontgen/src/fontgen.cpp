@@ -306,13 +306,10 @@ static int JobGenerateGlyph(void* context, void* data)
         return 0;
     }
 
-    uint32_t cell_width, cell_height, cell_ascent;
-    dmGameSystem::ResFontGetCacheCellSize(info->m_FontResource, &cell_width, &cell_height, &cell_ascent);
-
     if (info->m_IsSdf)
     {
         item->m_Data = dmFontGen::GenerateGlyphSdf(ttfresource, glyph_index, info->m_Scale, info->m_Padding, info->m_EdgeValue, &item->m_Glyph);
-        item->m_DataSize = 1 + cell_width * cell_height;
+        item->m_DataSize = 1 + item->m_Glyph.m_ImageWidth * item->m_Glyph.m_ImageHeight;
     }
 
     if (info->m_HasShadow && item->m_Data)
@@ -324,8 +321,8 @@ static int JobGenerateGlyph(void* context, void* data)
 
         // Make a copy
         item->m_Glyph.m_Channels = 3;
-        uint32_t w = item->m_Glyph.m_Width;
-        uint32_t h = item->m_Glyph.m_Height;
+        uint32_t w = item->m_Glyph.m_ImageWidth;
+        uint32_t h = item->m_Glyph.m_ImageHeight;
         uint32_t ch = item->m_Glyph.m_Channels;
         item->m_DataSize = w*h*ch + 1;
 
@@ -359,6 +356,8 @@ static int JobGenerateGlyph(void* context, void* data)
         item->m_Glyph.m_Height = 0;
         item->m_Glyph.m_Ascent = 0;
         item->m_Glyph.m_Descent = 0;
+        item->m_Glyph.m_ImageWidth = 0;
+        item->m_Glyph.m_ImageHeight = 0;
     }
 
     uint64_t tend = dmTime::GetTime();
