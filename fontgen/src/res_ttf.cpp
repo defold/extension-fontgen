@@ -180,13 +180,13 @@ uint8_t* GenerateGlyphSdf(TTFResource* ttfresource, uint32_t glyph_index,
     stbtt_GetGlyphHMetrics(&ttfresource->m_Font, glyph_index, &advx, &lsb);
 
     int x0, y0, x1, y1;
-    stbtt_GetGlyphBitmapBox(&ttfresource->m_Font, glyph_index, scale, scale, &x0, &y0, &x1, &y1);
+    stbtt_GetGlyphBox(&ttfresource->m_Font, glyph_index, &x0, &y0, &x1, &y1);
 
     int ascent = 0;
     int descent = 0;
     int srcw = 0;
     int srch = 0;
-    int offsetx, offsety;
+    int offsetx = 0, offsety = 0;
     uint8_t* src = stbtt_GetGlyphSDF(&ttfresource->m_Font, scale, glyph_index, padding, edge, pixel_dist_scale,
                                         &srcw, &srch, &offsetx, &offsety);
 
@@ -206,22 +206,35 @@ uint8_t* GenerateGlyphSdf(TTFResource* ttfresource, uint32_t glyph_index,
         descent = srch - ascent;
     }
 
-    out->m_Width = srcw;
-    out->m_Height = srch;
+    // The dimensions of the visible area
+    if (x0 != x1 && y0 != y1)
+    {
+        // Only modify non empty glyphs (from stbtt_GetGlyphSDF())
+        x0 -= padding;
+        y0 -= padding;
+        x1 += padding;
+        y1 += padding;
+    }
+
+    out->m_Width = (x1 - x0) * scale;
+    out->m_Height = (y1 - y0) * scale;
+    out->m_ImageWidth = srcw;
+    out->m_ImageHeight = srch;
     out->m_Channels = 1;
     out->m_Advance = advx*scale;;
     out->m_LeftBearing = lsb*scale;
     out->m_Ascent = ascent;
     out->m_Descent = descent;
 
-    // printf("glyph: %d  w/h: %d, %d adv: %.2f  lsb: %.2f  asc/dsc: %.2f, %.2f\n", glyph_index,
+    // printf("glyph: %d  w/h: %f, %f adv: %.2f  lsb: %.2f  asc/dsc: %.2f, %.2f img w/h: %u, %d\n", glyph_index,
     //         out->m_Width, out->m_Height,
     //         out->m_Advance, out->m_LeftBearing,
-    //         out->m_Ascent, out->m_Descent);
+    //         out->m_Ascent, out->m_Descent,
+    //         out->m_ImageWidth, out->m_ImageHeight);
 
 
-    // printf("  box: p0: %d, %d p1: %d, %d\n", x0, y0, x1, y1);
-    // printf("  offset: %d, %d \n", offsetx, offsety);
+    //printf("  box: p0: %f, %f p1: %f, %f\n", x0 * scale, y0 * scale, x1 * scale, y1 * scale);
+    //printf("  offset: %d, %d \n", offsetx, offsety);
 
     // int gi_T = dmFontGen::CodePointToGlyphIndex(ttfresource, 'T');
     // int gi_h = dmFontGen::CodePointToGlyphIndex(ttfresource, 'h');
