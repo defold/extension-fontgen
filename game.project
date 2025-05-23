@@ -10,7 +10,7 @@ height = 640
 
 [project]
 title = extension-font
-custom_resources = /assets/fonts/Roboto/Roboto-Bold.ttf
+_custom_resources = /assets/fonts/Roboto/Roboto-Bold.ttf
 
 [render]
 clear_color_red = 0.3
