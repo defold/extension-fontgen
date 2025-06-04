@@ -92,11 +92,6 @@ _See [ext.properties](http://github.com/defold/extension-fontgen/fontgen/ext.pro
 * `fontgen.sdf_base_padding` - The base padding when generating sdf glyphs [0-255]
 * `fontgen.sdf_edge_value` - The on edge when generating sdf glyphs. [0-255]
 
-# Api
-
-[Script Api](https://defold.com/extension-fontgen/fontgen_api/)
-
-
 # Font Credits
 
 * [Roboto](https://fonts.google.com/specimen/Roboto) by [Christian Robertson](https://fonts.google.com/?query=Christian+Robertson)
