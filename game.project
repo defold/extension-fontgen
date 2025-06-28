@@ -21,3 +21,6 @@ clear_color_alpha = 1.0
 [native_extension]
 _app_manifest = /game.appmanifest
 
+
+[font]
+runtime_generation = 1

@@ -8,7 +8,5 @@ shadow_blur: 0
 shadow_x: 2.0
 shadow_y: -2.0
 output_format: TYPE_DISTANCE_FIELD
-cache_width: 512
-cache_height: 256
 render_mode: MODE_MULTI_LAYER
-dynamic: true
+characters: " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"

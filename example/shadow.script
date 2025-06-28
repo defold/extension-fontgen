@@ -10,34 +10,27 @@ function init(self)
 
 	msg.post(".", "acquire_input_focus")
 
-	self.font = hash("/assets/fonts/roboto.fontc")
-	self.font_outline = hash("/assets/fonts/roboto_outline.fontc")
+
 	self.font_outline_shadow = hash("/assets/fonts/roboto_outline_shadow.fontc")
+	self.font_outline_shadow_4px = hash("/assets/fonts/roboto_outline_shadow_4px.fontc")
+	self.font_outline_shadow_blur = hash("/assets/fonts/roboto_outline_shadow_blur.fontc")
 
 	self.ttf = hash("/assets/fonts/Roboto/Roboto-Bold.ttf")
 	--self.ttf = "/assets/fonts/Roboto/Roboto-Italic.ttf"
 	local codepoint_min = 65 -- A
 	local codepoint_max = 90 -- Z
-	font.add_source(self.font, 				  self.ttf, codepoint_min, codepoint_max)
-	font.add_source(self.font_outline, 		  self.ttf, codepoint_min, codepoint_max)
 	font.add_source(self.font_outline_shadow, self.ttf, codepoint_min, codepoint_max)
+	font.add_source(self.font_outline_shadow_4px, self.ttf, codepoint_min, codepoint_max)
 
 	self.chars = " !\n\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
-	font.add_glyphs(self.font, self.chars, add_glyph_callback)
-	local request = font.add_glyphs(self.font_outline, self.chars, add_glyph_callback)
-	print("Asynchronous request id:", request)
-
 	font.add_glyphs(self.font_outline_shadow, self.chars, add_glyph_callback)
+	font.add_glyphs(self.font_outline_shadow_4px, self.chars, add_glyph_callback)
+	font.add_glyphs(self.font_outline_shadow_blur, self.chars, add_glyph_callback)
 end
 
 function final(self)
 	if font ~= nil then
-		-- note necessary, but good for testing the code path
-		font.remove_glyphs(self.font, "DEFdef")
-		-- note necessary, but good for testing the code path
-		font.remove_source(self.font, self.ttf)
-		font.remove_source(self.font_outline, self.ttf)
 		font.remove_source(self.font_outline_shadow, self.ttf)
 	end
 end
@@ -45,12 +38,12 @@ end
 function on_input(self, action_id, action)
 	if action_id == hash("touch") and action.pressed then
 		print("Removing all chars")
-		font.remove_glyphs(self.font, self.chars)
-		font.remove_glyphs(self.font_outline, self.chars)
 		font.remove_glyphs(self.font_outline_shadow, self.chars)
+		font.remove_source(self.font_outline_shadow_4px, self.ttf)
+		font.remove_source(self.font_outline_shadow_blur, self.ttf)
 		print("Adding all chars")
-		font.add_glyphs(self.font, self.chars, add_glyph_callback)
-		font.add_glyphs(self.font_outline, self.chars, add_glyph_callback)
 		font.add_glyphs(self.font_outline_shadow, self.chars, add_glyph_callback)
+		font.add_glyphs(self.font_outline_shadow_4px, self.chars, add_glyph_callback)
+		font.add_glyphs(self.font_outline_shadow_blur, self.chars, add_glyph_callback)
 	end
 end

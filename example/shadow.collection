@@ -1,0 +1,286 @@
+name: "main"
+scale_along_z: 0
+embedded_instances {
+  id: "go"
+  data: "components {\n"
+  "  id: \"shadow\"\n"
+  "  component: \"/example/shadow.script\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "generated"
+  children: "OutShadow"
+  data: ""
+}
+embedded_instances {
+  id: "vanilla"
+  children: "OutShadowV"
+  data: ""
+}
+embedded_instances {
+  id: "OutShadowV"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 68.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "OutShadow"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 127.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "xxx"
+  data: "embedded_components {\n"
+  "  id: \"x\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"x\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 10.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"x_gen\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"x\\\"\\n"
+  "font: \\\"/assets/fonts/roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: -10.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 313.0
+    y: 336.0
+  }
+  scale3 {
+    x: 5.0
+    y: 5.0
+  }
+}
+embedded_instances {
+  id: "OO"
+  data: "embedded_components {\n"
+  "  id: \"O\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"O\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 12.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"O_gen\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"O\\\"\\n"
+  "font: \\\"/assets/fonts/roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: -12.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 313.0
+    y: 555.0
+  }
+  scale3 {
+    x: 5.0
+    y: 5.0
+  }
+}
+embedded_instances {
+  id: "xxx_4px"
+  data: "embedded_components {\n"
+  "  id: \"x\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"x\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto_outline_shadow_4px.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 12.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"x_gen\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"x\\\"\\n"
+  "font: \\\"/assets/fonts/roboto_outline_shadow_4px.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: -12.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 584.0
+    y: 336.0
+  }
+  scale3 {
+    x: 5.0
+    y: 5.0
+  }
+}
+embedded_instances {
+  id: "PP"
+  data: "embedded_components {\n"
+  "  id: \"P\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"O\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto_outline_shadow_blur.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 20.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"P_gen\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"O\\\"\\n"
+  "font: \\\"/assets/fonts/roboto_outline_shadow_blur.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: -20.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 660.0
+    y: 555.0
+  }
+  scale3 {
+    x: 5.0
+    y: 5.0
+  }
+}
