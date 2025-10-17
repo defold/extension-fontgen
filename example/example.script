@@ -16,19 +16,13 @@ function init(self)
 
 	self.ttf = hash("/assets/fonts/Roboto/Roboto-Bold.ttf")
 	--self.ttf = "/assets/fonts/Roboto/Roboto-Italic.ttf"
-	local codepoint_min = 65 -- A
-	local codepoint_max = 90 -- Z
-	font.add_source(self.font, 				  self.ttf, codepoint_min, codepoint_max)
-	font.add_source(self.font_outline, 		  self.ttf, codepoint_min, codepoint_max)
-	font.add_source(self.font_outline_shadow, self.ttf, codepoint_min, codepoint_max)
+	-- local codepoint_min = 65 -- A
+	-- local codepoint_max = 90 -- Z
+	-- font.add_source(self.font, 				  self.ttf, codepoint_min, codepoint_max)
+	-- font.add_source(self.font_outline, 		  self.ttf, codepoint_min, codepoint_max)
+	-- font.add_source(self.font_outline_shadow, self.ttf, codepoint_min, codepoint_max)
 
 	self.chars = " !\n\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-
-	font.add_glyphs(self.font, self.chars, add_glyph_callback)
-	local request = font.add_glyphs(self.font_outline, self.chars, add_glyph_callback)
-	print("Asynchronous request id:", request)
-
-	font.add_glyphs(self.font_outline_shadow, self.chars, add_glyph_callback)
 end
 
 function final(self)
@@ -36,9 +30,9 @@ function final(self)
 		-- note necessary, but good for testing the code path
 		font.remove_glyphs(self.font, "DEFdef")
 		-- note necessary, but good for testing the code path
-		font.remove_source(self.font, self.ttf)
-		font.remove_source(self.font_outline, self.ttf)
-		font.remove_source(self.font_outline_shadow, self.ttf)
+		-- font.remove_source(self.font, self.ttf)
+		-- font.remove_source(self.font_outline, self.ttf)
+		-- font.remove_source(self.font_outline_shadow, self.ttf)
 	end
 end
 

@@ -1,0 +1,220 @@
+name: "main"
+scale_along_z: 0
+embedded_instances {
+  id: "go"
+  data: "components {\n"
+  "  id: \"example\"\n"
+  "  component: \"/example/example.script\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "generated"
+  children: "Normal"
+  children: "OutShadow"
+  children: "Outline"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "text: \\\"TTF:\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 229.0\n"
+  "    y: 539.0\n"
+  "  }\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "Normal"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/roboto.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 473.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "Outline"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/roboto_outline.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 399.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "OutShadow"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/roboto_outline_shadow.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 324.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "otf"
+  children: "Normal1"
+  children: "OutShadow1"
+  children: "Outline1"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "text: \\\"OTF:\\\"\\n"
+  "font: \\\"/assets/fonts/vanilla/vanilla_roboto.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 229.0\n"
+  "    y: 269.0\n"
+  "  }\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "Normal1"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/montserrat_otf.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 203.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "Outline1"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/montserrat_outline_otf.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 129.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}
+embedded_instances {
+  id: "OutShadow1"
+  data: "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 256.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.302\\n"
+  "  y: 0.4\\n"
+  "  z: 0.8\\n"
+  "}\\n"
+  "text: \\\"The Little Brown Fox\\\"\\n"
+  "font: \\\"/assets/fonts/montserrat_outline_shadow_otf.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 475.0
+    y: 54.0
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+  }
+}

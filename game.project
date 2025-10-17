@@ -1,5 +1,6 @@
 [bootstrap]
-main_collection = /example/example.collectionc
+main_collection = /example/lorem.collectionc
+_main_collection = /example/example.collectionc
 
 [script]
 shared_state = 1
@@ -20,7 +21,11 @@ clear_color_alpha = 1.0
 
 [native_extension]
 _app_manifest = /game.appmanifest
-
+app_manifest = /game.appmanifest
 
 [font]
 runtime_generation = 1
+
+[profiler]
+performance_timeline_enabled = 1
+

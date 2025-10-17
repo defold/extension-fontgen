@@ -1,111 +1,111 @@
 platforms:
   armv7-ios:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       frameworks: []
       linkFlags: []
   arm64-ios:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       frameworks: []
       linkFlags: []
   x86_64-ios:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       frameworks: []
       linkFlags: []
   armv7-android:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeJars: []
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       linkFlags: []
       jetifier: true
   arm64-android:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeJars: []
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       linkFlags: []
       jetifier: true
   arm64-osx:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       frameworks: []
       linkFlags: []
   x86_64-osx:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       frameworks: []
       linkFlags: []
   x86_64-linux:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       linkFlags: []
   arm64-linux:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       linkFlags: []
   x86-win32:
     context:
-      excludeLibs: []
+      excludeLibs: [libfont]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [libfont.lib]
+      symbols: []
+      libs: [libfont_skribidi.lib, libharfbuzz.lib, libsheenbidi.lib, libunibreak.lib, libskribidi.lib]
       linkFlags: []
   x86_64-win32:
     context:
-      excludeLibs: []
+      excludeLibs: [libfont]
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [libfont.lib]
+      symbols: []
+      libs: [libfont_skribidi.lib, libharfbuzz.lib, libsheenbidi.lib, libunibreak.lib, libskribidi.lib]
       linkFlags: []
   js-web:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeJsLibs: []
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       linkFlags: []
   wasm-web:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeJsLibs: []
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       linkFlags: []
   wasm_pthread-web:
     context:
-      excludeLibs: []
+      excludeLibs: [font]
       excludeJsLibs: []
       excludeSymbols: []
-      symbols: [ScriptFontExt, ResourceTypeTTFFont]
-      libs: [font]
+      symbols: []
+      libs: [font_skribidi, harfbuzz, sheenbidi, unibreak, skribidi]
       linkFlags: []

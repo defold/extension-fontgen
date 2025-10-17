@@ -1,0 +1,16 @@
+image: "/builtins/graphics/particle_blob.png"
+tile_width: 32
+tile_height: 32
+collision: "/builtins/graphics/particle_blob.png"
+convex_hulls {
+  index: 0
+  count: 16
+  collision_group: ""
+}
+collision_groups: "default"
+animations {
+  id: "anim"
+  start_tile: 1
+  end_tile: 1
+}
+extrude_borders: 2
