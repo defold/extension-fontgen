@@ -1,0 +1,114 @@
+local languages = require('localization.languages')
+
+local function load_language(self, language)
+	self.loading_language = language
+	self.loading_proxy = msg.url(nil, "languages", language)
+	print("LOADING", language)
+	msg.post(self.loading_proxy, "async_load")
+end
+
+local function unset_language(self)	
+	if self.language_ttf_hash then
+		font.remove_font(self.font_collection, self.language_ttf_hash)
+		print("REMOVED FONT", self.language_ttf_hash)
+	end
+
+	label.set_text(self.label, "")
+
+	self.language_ttf_hash = nil
+	self.selected_language = nil
+end
+
+local function set_language(self, language)
+	assert(self.selected_language == nil)
+
+	local info = languages.get_language(language)
+	self.selected_language = language
+	self.language_ttf_hash = nil
+	
+	if info.font_hash ~= self.font_collection then
+		local font_info = font.get_info(info.font_hash)
+		local ttf_hash = font_info.fonts[1].path_hash
+		self.language_ttf_hash = ttf_hash
+		font.add_font(self.font_collection, self.language_ttf_hash)
+		print("ADDED FONT", ttf_hash)
+	end
+
+	--pprint("FONT", font.get_info(self.font_collection))
+
+	font.prewarm_text(self.font_collection, info.text, function (self, request_id, result, err)
+		if result then
+			print("PREWARMING OK!")
+			label.set_text(self.label, info.text)
+		else
+			print("Error prewarming text:", err)
+		end
+	end)
+end
+	
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	-- profiler.enable(true)
+	-- profiler.enable_ui(true)
+	-- --profiler.set_ui_mode(profiler.VIEW_MODE_MINIMIZED)
+	-- profiler.set_ui_mode(profiler.VIEW_MODE_FULL)
+
+	self.loading_language = nil
+
+	self.label = msg.url(nil, 'lorem', 'label')
+	self.font_collection = go.get(self.label, "font")
+
+	self.current_language_index = 2
+	self.supported_languages = { 'english', 'arabic' }
+
+	local language = self.supported_languages[self.current_language_index]
+	load_language(self, language)
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+
+	-- -- draw a white line from (200, 200) to (200, 300)
+	-- local color = vmath.vector4(255, 0.5, 0, 255)
+	-- local x = 30
+	-- local width = 250
+	-- local start_pos = vmath.vector3(x, 0, 0.5)
+	-- local end_pos = vmath.vector3(x, 1000, 0.5)
+	-- msg.post("@render:", "draw_line", { start_point = start_pos, end_point = end_pos, color = color } )
+	-- start_pos = vmath.vector3(x+width, 0, 0.5)
+	-- end_pos = vmath.vector3(x+width, 1000, 0.5)
+	-- msg.post("@render:", "draw_line", { start_point = start_pos, end_point = end_pos, color = color } )
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("set_language") then
+		set_language(self, message.language)
+
+		msg.post(self.loading_proxy, "unload")
+
+	elseif message_id == hash("proxy_loaded") then
+		-- enable the collection and let the loader know
+		msg.post(sender, "init")
+		
+		msg.post(".", "set_language", {language = self.loading_language})
+		self.loading_language = nil
+	end
+end
+
+function on_input(self, action_id, action)
+	if action.pressed and hash("touch") == action_id then
+		unset_language(self)
+
+		self.current_language_index = self.current_language_index + 1
+		if self.current_language_index > #self.supported_languages then
+			self.current_language_index = 1
+		end
+		local language = self.supported_languages[self.current_language_index]
+		load_language(self, language)
+	end
+end

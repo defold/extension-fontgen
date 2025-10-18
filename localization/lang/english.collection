@@ -1,0 +1,26 @@
+name: "english"
+scale_along_z: 0
+embedded_instances {
+  id: "go"
+  data: "components {\n"
+  "  id: \"english\"\n"
+  "  component: \"/localization/lang/english.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"label\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 128.0\\n"
+  "  y: 32.0\\n"
+  "}\\n"
+  "text: \\\"Label\\\"\\n"
+  "font: \\\"/assets/fonts/noto/noto_outline.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label-df.material\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: -69.0
+    y: -36.0
+  }
+}
