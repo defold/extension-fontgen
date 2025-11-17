@@ -58,7 +58,7 @@ function init(self)
 	self.label = msg.url(nil, 'lorem', 'label')
 	self.font_collection = go.get(self.label, "font")
 
-	self.current_language_index = 2
+	self.current_language_index = 1
 	self.supported_languages = { 'english', 'arabic' }
 
 	local language = self.supported_languages[self.current_language_index]

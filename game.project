@@ -20,7 +20,6 @@ clear_color_blue = 0.3
 clear_color_alpha = 1.0
 
 [native_extension]
-_app_manifest = /game.appmanifest
 app_manifest = /game.appmanifest
 
 [font]
